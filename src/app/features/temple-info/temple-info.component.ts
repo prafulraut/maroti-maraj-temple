@@ -81,6 +81,37 @@ export class TempleInfoComponent implements OnInit {
     { date: '16 Mar', key: 'D11' },
   ];
 
+  // Nagdwar Palkhi seva team: palkhi bearers, dapli player and bhajan mandal
+  palkhiSevaGroups: { key: string; icon: string; people: Trustee[] }[] = [
+    {
+      key: 'VAHAK', icon: '🛕',
+      people: [
+        { nameMr: 'विनोद राऊत', nameEn: 'Vinod Raut', roleKey: 'VAHAK' },
+        { nameMr: 'संजू जोशी', nameEn: 'Sanju Joshi', roleKey: 'VAHAK' },
+      ],
+    },
+    {
+      key: 'DAPRI', icon: '🥁',
+      people: [
+        { nameMr: 'मंगेश', nameEn: 'Mangesh', roleKey: 'DAPRI' },
+      ],
+    },
+    {
+      key: 'BHAJAN', icon: '🎶',
+      people: [
+        { nameMr: 'अजय ठाकरे', nameEn: 'Ajay Thakre', roleKey: 'BHAJAN' },
+        { nameMr: 'प्रतीक वानखडे', nameEn: 'Pratik Wankhade', roleKey: 'BHAJAN' },
+        { nameMr: 'अमोल नवघरे', nameEn: 'Amol Navghare', roleKey: 'BHAJAN' },
+        { nameMr: 'शैलेश मानकर', nameEn: 'Shailesh Mankar', roleKey: 'BHAJAN' },
+        { nameMr: 'मयूर', nameEn: 'Mayur', roleKey: 'BHAJAN' },
+        { nameMr: 'ऋषिकेश', nameEn: 'Rushikesh', roleKey: 'BHAJAN' },
+        { nameMr: 'सचिन', nameEn: 'Sachin', roleKey: 'BHAJAN' },
+        { nameMr: 'आशिष आसन', nameEn: 'Ashish Asan', roleKey: 'BHAJAN' },
+        { nameMr: 'जीवन', nameEn: 'Jivan', roleKey: 'BHAJAN' },
+      ],
+    },
+  ];
+
   // Shown until the admin uploads real photos
   private defaultGallery = [
     { url: 'assets/images/maharaj.png', alt: 'Main Shrine', labelKey: 'INFO.GALLERY.SHRINE' },
@@ -107,6 +138,7 @@ export class TempleInfoComponent implements OnInit {
     { id: 'timings', key: 'INFO.TIMINGS_TITLE' },
     { id: 'programs', key: 'INFO.PROGRAMS_TITLE' },
     { id: 'vari', key: 'INFO.VARI_TITLE' },
+    { id: 'palkhi-seva', key: 'INFO.SEVA_TITLE' },
     { id: 'trustees', key: 'INFO.TRUSTEES_TITLE' },
     { id: 'visit', key: 'LOCATION.TITLE' },
   ];

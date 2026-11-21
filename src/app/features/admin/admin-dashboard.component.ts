@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AdminService } from '../../core/services/admin.service';
 import { AuthService } from '../../core/services/auth.service';
+import { NotificationService } from '../../core/services/notification.service';
 
 type Tab = 'overview' | 'donations' | 'gallery' | 'palkhi';
 
@@ -44,6 +45,7 @@ export class AdminDashboardComponent implements OnInit {
     private admin: AdminService,
     private auth: AuthService,
     private fb: FormBuilder,
+    private notifications: NotificationService,
   ) {}
 
   ngOnInit(): void {
@@ -174,6 +176,7 @@ export class AdminDashboardComponent implements OnInit {
         this.flash(this.editingEventId ? 'Event updated.' : 'Event created.', 'ok');
         this.cancelEvent();
         this.loadEvents();
+        this.notifications.refresh();
         this.loadStats();
       },
       error: (err) => this.handleError(err, 'Could not save event.'),
@@ -186,6 +189,7 @@ export class AdminDashboardComponent implements OnInit {
       next: () => {
         this.events = this.events.filter(x => x._id !== e._id);
         this.flash('Event deleted.', 'ok');
+        this.notifications.refresh();
         this.loadStats();
       },
       error: (err) => this.handleError(err, 'Could not delete event.'),

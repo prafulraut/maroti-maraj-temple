@@ -129,6 +129,31 @@
       <p class="vari-note">{{ 'INFO.VARI_NOTE' | translate }}</p>
     </section>
 
+    <!-- Nagdwar Palkhi seva team -->
+    <section class="info-section seva-section" id="palkhi-seva" *ngIf="!isHome">
+      <h2>{{ 'INFO.SEVA_TITLE' | translate }}</h2>
+      <div class="divider center-divider"></div>
+      <p class="section-subtitle">{{ 'INFO.SEVA_SUBTITLE' | translate }}</p>
+
+      <div class="seva-grid">
+        <div class="seva-card" *ngFor="let g of palkhiSevaGroups" [ngClass]="'seva-' + g.key.toLowerCase()">
+          <div class="seva-head">
+            <span class="seva-icon" aria-hidden="true">{{ g.icon }}</span>
+            <div>
+              <h3>{{ 'INFO.SEVA.' + g.key | translate }}</h3>
+              <small>{{ g.people.length }} {{ 'INFO.SEVA.SEVEKARI' | translate }}</small>
+            </div>
+          </div>
+          <ul class="seva-names">
+            <li *ngFor="let p of g.people">
+              <span class="seva-avatar" aria-hidden="true">{{ trusteeName(p).charAt(0) }}</span>
+              <span>{{ trusteeName(p) }}</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
     <!-- Board of Trustees -->
     <section class="info-section priests-section" id="trustees" *ngIf="!isHome">
       <h2>{{ 'INFO.TRUSTEES_TITLE' | translate }}</h2>

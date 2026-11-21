@@ -25,6 +25,7 @@ import { GalleryComponent } from './features/gallery/gallery.component';
 import { GalleryManagementComponent } from './features/admin/gallery-management/gallery-management.component';
 import { DonationManagementComponent } from './features/admin/donation-management/donation-management.component';
 import { DonateComponent } from './features/donate/donate.component';
+import { LocalDatePipe } from './core/pipes/local-date.pipe';
 
 @NgModule({
   declarations: [
@@ -40,7 +41,8 @@ import { DonateComponent } from './features/donate/donate.component';
     GalleryComponent,
     GalleryManagementComponent,
     DonationManagementComponent,
-    DonateComponent
+    DonateComponent,
+    LocalDatePipe
   ],
   imports: [
     BrowserModule,

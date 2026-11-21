@@ -983,3 +983,85 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Nagdwar Palkhi seva team */
+.seva-section { text-align: center; }
+.seva-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  text-align: left;
+}
+.seva-card {
+  background: #fff;
+  border-radius: 20px;
+  border-top: 4px solid #f97316;
+  box-shadow: 0 10px 20px -8px rgba(0, 0, 0, 0.15);
+  padding: 1.5rem;
+}
+/* The largest group gets the full width so its names have room */
+.seva-bhajan { grid-column: 1 / -1; }
+.seva-bhajan { border-top-color: #eab308; }
+.seva-dapri { border-top-color: #c2410c; }
+.seva-head {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin-bottom: 1.1rem;
+}
+.seva-icon {
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #fff7ed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+}
+.seva-head h3 { margin: 0; color: #1c1917; font-size: 1.2rem; }
+.seva-head small { color: #78716c; }
+.seva-names {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.6rem;
+}
+.seva-names li {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+  background: #fffaf3;
+  border: 1px solid #fde4c8;
+  border-radius: 12px;
+  padding: 0.55rem 0.75rem;
+  color: #44403c;
+  font-weight: 500;
+}
+.seva-names li span:last-child { overflow-wrap: anywhere; }
+.seva-avatar {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #fb923c, #c2410c);
+  color: #fff;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 760px) {
+  .seva-grid { grid-template-columns: 1fr; gap: 1rem; }
+  .seva-card { padding: 1.1rem; border-radius: 16px; }
+}
+@media (max-width: 420px) {
+  .seva-names { grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+  .seva-names li { padding: 0.5rem; gap: 0.45rem; font-size: 0.9rem; }
+  .seva-avatar { width: 28px; height: 28px; font-size: 0.85rem; }
+}

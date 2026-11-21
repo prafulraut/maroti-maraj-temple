@@ -62,5 +62,52 @@
         </select>
       </li>
     </ul>
+
+    <!-- Notifications: new programmes added by the admin -->
+    <div class="notif-wrapper">
+      <button type="button" class="notif-bell" (click)="toggleNotifications($event)"
+              [attr.aria-label]="'NOTIF.TITLE' | translate" [attr.aria-expanded]="isNotifOpen">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+        </svg>
+        <span class="notif-badge" *ngIf="(unreadCount$ | async) as count">{{ count > 9 ? '9+' : count }}</span>
+      </button>
+
+      <div class="notif-panel" *ngIf="isNotifOpen" role="dialog" [attr.aria-label]="'NOTIF.TITLE' | translate">
+        <div class="notif-header">
+          <span class="notif-title">{{ 'NOTIF.TITLE' | translate }}</span>
+          <button type="button" class="notif-mark-all" *ngIf="(unreadCount$ | async)" (click)="markAllAsRead($event)">
+            {{ 'NOTIF.MARK_ALL_READ' | translate }}
+          </button>
+        </div>
+
+        <ng-container *ngIf="notifications$ | async as items">
+          <ul class="notif-list" *ngIf="items.length; else emptyNotif">
+            <li *ngFor="let n of items; trackBy: trackById" class="notif-item" [class.unread]="n.unread"
+                (click)="openNotification(n)">
+              <span class="notif-dot" *ngIf="n.unread"></span>
+              <div class="notif-body">
+                <div class="notif-item-title">
+                  🪔 {{ n.title }}
+                  <span class="notif-new" *ngIf="n.unread">{{ 'NOTIF.NEW' | translate }}</span>
+                </div>
+                <div class="notif-meta">
+                  📅 {{ n.date | localDate:'date':translate.currentLang }}<span *ngIf="n.time"> · ⏰ {{ n.time | localDate:'time':translate.currentLang }}</span>
+                </div>
+                <div class="notif-meta" *ngIf="n.location">📍 {{ n.location === defaultLocation ? ('NOTIF.DEFAULT_LOCATION' | translate) : n.location }}</div>
+                <p class="notif-desc">{{ n.description }}</p>
+                <div class="notif-time">{{ 'NOTIF.ADDED' | translate }} {{ n.createdAt | localDate:'dateTime':translate.currentLang }}</div>
+              </div>
+            </li>
+          </ul>
+        </ng-container>
+
+        <ng-template #emptyNotif>
+          <div class="notif-empty">🔔 {{ 'NOTIF.EMPTY' | translate }}</div>
+        </ng-template>
+      </div>
+    </div>
   </div>
 </nav>

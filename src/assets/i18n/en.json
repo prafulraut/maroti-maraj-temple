@@ -13,6 +13,8 @@
     "PALKHI_TRACKER": "Palkhi Tracker",
     "DONATE": "Donate"
   },
+"NOTIF": {    "TITLE": "Notifications",    "MARK_ALL_READ": "Mark all as read",    "NEW": "New",    "ADDED": "Added",    "EMPTY": "No programmes yet",
+    "DEFAULT_LOCATION": "Maroti Maharaj Temple"  },
   "LOGIN": {
     "TITLE": "Welcome Back",
     "SUBTITLE": "Sign in to access the Maroti Maharaj Temple portal",
@@ -366,6 +368,14 @@
       "D9": "Barabhatya → Amrai",
       "D10": "Amrai → Hiwarkhed",
       "D11": "Hiwarkhed → Salbardi · Mavand Mahaprasad"
+    },
+    "SEVA_TITLE": "Nagdwar Palkhi Seva",
+    "SEVA_SUBTITLE": "The sevekaris who carry the Palkhi and fill the Vari with bhajans.",
+    "SEVA": {
+      "VAHAK": "Palkhi Vahak (Bearers)",
+      "BHAJAN": "Bhajan Mandal",
+      "DAPRI": "Dapli Vadak",
+      "SEVEKARI": "sevekari"
     },
     "TRUSTEES_TITLE": "Board of Trustees",
     "TRUSTEES_SUBTITLE": "The trustees who manage the Sevashram.",
