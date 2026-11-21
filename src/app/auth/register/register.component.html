@@ -1,0 +1,102 @@
+<div class="register-container">
+  <div class="register-background">
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+    <div class="shape shape-3"></div>
+  </div>
+
+  <div class="register-card">
+    <div class="register-header">
+      <div class="logo-icon">🛕</div>
+      <h2>{{ 'REGISTER.TITLE' | translate }}</h2>
+      <p>{{ 'REGISTER.SUBTITLE' | translate }}</p>
+    </div>
+
+    <div *ngIf="error" class="alert alert-danger">
+      {{error}}
+    </div>
+
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+
+      <div class="form-group">
+        <label for="name">{{ 'REGISTER.FULL_NAME' | translate }}</label>
+        <div class="input-wrapper">
+          <input
+            type="text"
+            id="name"
+            formControlName="name"
+            class="form-control"
+            [ngClass]="{ 'is-invalid': submitted && f['name'].errors }"
+            [placeholder]="'REGISTER.NAME_PLACEHOLDER' | translate"
+          />
+          <div *ngIf="submitted && f['name'].errors" class="invalid-feedback">
+            <div *ngIf="f['name'].errors['required']">{{ 'REGISTER.NAME_REQUIRED' | translate }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="email">{{ 'REGISTER.EMAIL' | translate }}</label>
+        <div class="input-wrapper">
+          <input
+            type="email"
+            id="email"
+            formControlName="email"
+            class="form-control"
+            [ngClass]="{ 'is-invalid': submitted && f['email'].errors }"
+            [placeholder]="'REGISTER.EMAIL_PLACEHOLDER' | translate"
+          />
+          <div *ngIf="submitted && f['email'].errors" class="invalid-feedback">
+            <div *ngIf="f['email'].errors['required']">{{ 'REGISTER.EMAIL_REQUIRED' | translate }}</div>
+            <div *ngIf="f['email'].errors['email']">{{ 'REGISTER.EMAIL_INVALID' | translate }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="phone">{{ 'REGISTER.PHONE' | translate }}</label>
+        <div class="input-wrapper">
+          <input
+            type="text"
+            id="phone"
+            formControlName="phone"
+            class="form-control"
+            [ngClass]="{ 'is-invalid': submitted && f['phone'].errors }"
+            [placeholder]="'REGISTER.PHONE_PLACEHOLDER' | translate"
+          />
+          <div *ngIf="submitted && f['phone'].errors" class="invalid-feedback">
+            <div *ngIf="f['phone'].errors['required']">{{ 'REGISTER.PHONE_REQUIRED' | translate }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">{{ 'REGISTER.PASSWORD' | translate }}</label>
+        <div class="input-wrapper">
+          <input
+            type="password"
+            id="password"
+            formControlName="password"
+            class="form-control"
+            [ngClass]="{ 'is-invalid': submitted && f['password'].errors }"
+            placeholder="••••••••"
+          />
+          <div *ngIf="submitted && f['password'].errors" class="invalid-feedback">
+            <div *ngIf="f['password'].errors['required']">{{ 'REGISTER.PASSWORD_REQUIRED' | translate }}</div>
+            <div *ngIf="f['password'].errors['minlength']">{{ 'REGISTER.PASSWORD_MIN' | translate }}</div>
+          </div>
+        </div>
+      </div>
+
+      <button [disabled]="loading" class="btn btn-primary btn-block">
+        <span *ngIf="loading" class="spinner"></span>
+        <span *ngIf="!loading">{{ 'REGISTER.SUBMIT' | translate }}</span>
+      </button>
+
+    </form>
+
+    <div class="register-footer">
+      <p>{{ 'REGISTER.HAS_ACCOUNT' | translate }} <a routerLink="/login">{{ 'REGISTER.SIGN_IN_LINK' | translate }}</a></p>
+    </div>
+  </div>
+</div>

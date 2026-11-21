@@ -1,0 +1,167 @@
+<div class="dashboard-container">
+  <div class="header">
+    <h1>{{ 'DASHBOARD.WELCOME' | translate }}, {{ user?.name }}!</h1>
+    <p>{{ 'DASHBOARD.SUBTITLE' | translate }}</p>
+  </div>
+
+  <div class="dashboard-grid">
+    <div class="card profile-card">
+      <h3>{{ 'DASHBOARD.YOUR_PROFILE' | translate }}</h3>
+      <p><strong>{{ 'DASHBOARD.NAME' | translate }}:</strong> {{ user?.name }}</p>
+      <p><strong>{{ 'DASHBOARD.EMAIL' | translate }}:</strong> {{ user?.email }}</p>
+      <p><strong>{{ 'DASHBOARD.PHONE' | translate }}:</strong> {{ user?.phone || ('DASHBOARD.NOT_PROVIDED' | translate) }}</p>
+      <button type="button" class="btn btn-outline" (click)="openProfile()">
+        {{ activePanel === 'profile' ? ('DASHBOARD.CLOSE' | translate) : ('DASHBOARD.EDIT_PROFILE' | translate) }}
+      </button>
+    </div>
+
+    <div class="card feature-card">
+      <h3>{{ 'DASHBOARD.UPCOMING_EVENTS' | translate }}</h3>
+      <p>{{ 'DASHBOARD.EVENTS_DESC' | translate }}</p>
+      <button type="button" class="btn btn-primary" (click)="openEvents()">
+        {{ activePanel === 'events' ? ('DASHBOARD.HIDE_EVENTS' | translate) : ('DASHBOARD.VIEW_EVENTS' | translate) }}
+      </button>
+    </div>
+
+    <div class="card feature-card">
+      <h3>{{ 'DASHBOARD.DONATION_HISTORY' | translate }}</h3>
+      <p>{{ 'DASHBOARD.DONATIONS_DESC' | translate }}</p>
+      <div class="btn-row">
+        <button type="button" class="btn btn-primary" (click)="openDonations()">
+          {{ activePanel === 'donations' ? ('DASHBOARD.HIDE_DONATIONS' | translate) : ('DASHBOARD.MY_DONATIONS' | translate) }}
+        </button>
+        <a routerLink="/donate" class="btn btn-outline">🙏 {{ 'NAV.DONATE' | translate }}</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Edit Profile Panel ─────────────────────────────────────────────── -->
+  <div class="card panel" *ngIf="activePanel === 'profile'">
+    <div class="panel-header">
+      <h3>{{ 'DASHBOARD.EDIT_PROFILE' | translate }}</h3>
+      <button type="button" class="close-btn" (click)="closePanel()" aria-label="Close">&times;</button>
+    </div>
+
+    <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="profile-form">
+      <label>
+        {{ 'DASHBOARD.NAME' | translate }}
+        <input type="text" formControlName="name" />
+        <small class="error" *ngIf="profileForm.get('name')?.touched && profileForm.get('name')?.invalid">
+          {{ 'DASHBOARD.NAME_ERROR' | translate }}
+        </small>
+      </label>
+
+      <label>
+        {{ 'DASHBOARD.EMAIL' | translate }}
+        <input type="email" [value]="user?.email" disabled />
+        <small class="hint">{{ 'DASHBOARD.EMAIL_HINT' | translate }}</small>
+      </label>
+
+      <label>
+        {{ 'DASHBOARD.PHONE' | translate }}
+        <input type="tel" formControlName="phone" maxlength="10" />
+        <small class="error" *ngIf="profileForm.get('phone')?.touched && profileForm.get('phone')?.invalid">
+          {{ 'DASHBOARD.PHONE_ERROR' | translate }}
+        </small>
+      </label>
+
+      <label>
+        {{ 'DASHBOARD.ADDRESS' | translate }}
+        <textarea rows="2" formControlName="address"></textarea>
+      </label>
+
+      <p class="success" *ngIf="profileMessage">{{ profileMessage }}</p>
+      <p class="error" *ngIf="profileError">{{ profileError }}</p>
+
+      <div class="form-actions">
+        <button type="button" class="btn btn-outline" (click)="closePanel()">{{ 'DASHBOARD.CANCEL' | translate }}</button>
+        <button type="submit" class="btn btn-primary" [disabled]="savingProfile">
+          {{ savingProfile ? ('DASHBOARD.SAVING' | translate) : ('DASHBOARD.SAVE_CHANGES' | translate) }}
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ─── Events Panel ───────────────────────────────────────────────────── -->
+  <div class="card panel" *ngIf="activePanel === 'events'">
+    <div class="panel-header">
+      <h3>{{ 'DASHBOARD.UPCOMING_EVENTS' | translate }}</h3>
+      <button type="button" class="close-btn" (click)="closePanel()" aria-label="Close">&times;</button>
+    </div>
+
+    <p *ngIf="loadingEvents">{{ 'DASHBOARD.LOADING_EVENTS' | translate }}</p>
+    <p class="error" *ngIf="eventsError">{{ eventsError }}</p>
+    <p *ngIf="!loadingEvents && !eventsError && events.length === 0">{{ 'DASHBOARD.NO_EVENTS' | translate }}</p>
+
+    <ul class="item-list" *ngIf="!loadingEvents && events.length">
+      <li *ngFor="let e of events" class="item">
+        <div class="item-date">
+          <span class="day">{{ e.date | date: 'dd' }}</span>
+          <span class="month">{{ e.date | date: 'MMM yyyy' }}</span>
+        </div>
+        <div class="item-body">
+          <h4>{{ e.title }}</h4>
+          <p>{{ e.description }}</p>
+          <small>
+            <span *ngIf="e.time">🕒 {{ e.time }} &nbsp;</span>
+            📍 {{ e.location }}
+          </small>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- ─── Donations Panel ────────────────────────────────────────────────── -->
+  <div class="card panel" *ngIf="activePanel === 'donations'">
+    <div class="panel-header">
+      <h3>{{ 'DASHBOARD.MY_DONATIONS' | translate }}</h3>
+      <button type="button" class="close-btn" (click)="closePanel()" aria-label="Close">&times;</button>
+    </div>
+
+    <p *ngIf="loadingDonations">{{ 'DASHBOARD.LOADING_DONATIONS' | translate }}</p>
+    <p class="error" *ngIf="donationsError">{{ donationsError }}</p>
+    <div *ngIf="!loadingDonations && !donationsError && donations.length === 0">
+      <p>{{ 'DASHBOARD.NO_DONATIONS' | translate }} {{ user?.email }}.</p>
+      <a routerLink="/donate" class="btn btn-primary">🙏 {{ 'DASHBOARD.FIRST_DONATION' | translate }}</a>
+    </div>
+
+    <ng-container *ngIf="!loadingDonations && donations.length">
+      <p class="total">
+        {{ 'DASHBOARD.TOTAL_CONTRIBUTED' | translate }}: <strong>₹{{ donationTotal | number }}</strong>
+        <span class="pending-note" *ngIf="pendingDonationTotal">
+          · ₹{{ pendingDonationTotal | number }} {{ 'DASHBOARD.AWAITING_CONFIRMATION' | translate }}
+        </span>
+      </p>
+      <div class="table-scroll">
+        <table class="donation-table">
+          <thead>
+            <tr>
+              <th>{{ 'DASHBOARD.RECEIPT' | translate }}</th>
+              <th>{{ 'DASHBOARD.DATE' | translate }}</th>
+              <th>{{ 'DASHBOARD.PURPOSE' | translate }}</th>
+              <th>{{ 'DASHBOARD.AMOUNT' | translate }}</th>
+              <th>{{ 'DASHBOARD.MODE' | translate }}</th>
+              <th>{{ 'DASHBOARD.STATUS' | translate }}</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let d of donations">
+              <td class="mono">{{ d.receiptNo || '—' }}</td>
+              <td>{{ (d.donationDate || d.createdAt) | date: 'dd MMM yyyy' }}</td>
+              <td>
+                {{ d.purpose }}
+                <small class="sub" *ngIf="d.palkhiDay">🪔 {{ 'PALKHI.DAY' | translate }} {{ d.palkhiDay }}</small>
+              </td>
+              <td>₹{{ d.amount | number }}</td>
+              <td>{{ d.paymentMode || '—' }}</td>
+              <td><span class="status" [ngClass]="d.paymentStatus?.toLowerCase()">{{ d.paymentStatus }}</span></td>
+              <td><button type="button" class="link-btn" (click)="printReceipt(d)">🖨️ {{ 'DASHBOARD.RECEIPT' | translate }}</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <a routerLink="/donate" class="btn btn-primary">🙏 {{ 'DASHBOARD.DONATE_AGAIN' | translate }}</a>
+    </ng-container>
+  </div>
+</div>

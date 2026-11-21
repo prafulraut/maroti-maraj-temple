@@ -1,0 +1,147 @@
+<div class="gm-container">
+
+  <p class="gm-msg" *ngIf="msg" [class.err]="msgType === 'err'">{{ msg }}</p>
+
+  <!-- ═══ Visitor submissions waiting for approval ═══ -->
+  <div class="gm-card review-card" *ngIf="submissions.length">
+    <div class="gm-card-header">
+      <span class="gm-icon">🕒</span>
+      <h2>Waiting for approval <span class="count">({{ submissions.length }})</span></h2>
+    </div>
+    <p class="review-hint">Shared by visitors from the public Gallery page. Approve to publish, or reject to delete.</p>
+
+    <div class="manage-grid">
+      <div class="manage-item" *ngFor="let s of submissions">
+        <a [href]="gallery.imageSrc(s)" target="_blank" rel="noopener">
+          <video *ngIf="gallery.isVideo(s)" [src]="gallery.imageSrc(s) + '#t=0.1'" muted preload="metadata"></video>
+          <img *ngIf="!gallery.isVideo(s)" [src]="gallery.imageSrc(s)" [alt]="s.title || s.category" loading="lazy">
+        </a>
+        <div class="meta">
+          <span class="badge">{{ gallery.isVideo(s) ? '🎬 ' : '' }}{{ s.category }}</span>
+          <strong [title]="s.title">{{ s.title || 'Untitled' }}</strong>
+          <small>{{ s.uploaderName ? 'By ' + s.uploaderName + ' · ' : '' }}{{ s.createdAt | date:'medium' }}</small>
+          <small *ngIf="s.description" class="desc">{{ s.description }}</small>
+          <div class="actions">
+            <button class="btn-approve" (click)="approve(s)">✅ Approve</button>
+            <button class="btn-del" (click)="reject(s)">✖ Reject</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Upload ═══ -->
+  <div class="gm-card">
+    <div class="gm-card-header">
+      <span class="gm-icon">📤</span>
+      <h2>Upload Photos & Videos</h2>
+    </div>
+
+    <div class="gm-upload-grid">
+      <!-- Drop zone -->
+      <div>
+        <label class="dropzone" for="galleryInput"
+               [class.dragging]="isDragging"
+               (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)" (drop)="onDrop($event)">
+          <span class="dz-icon">🖼️ 🎬</span>
+          <strong>Drag & drop photos or videos here</strong>
+          <span>or click to choose (you can select many)</span>
+          <small>Photos: any format — JPG, PNG, HEIC, WebP, BMP… (auto-resized, GIF max 4 MB) · Videos: any format up to 50 MB · max 20 at once</small>
+        </label>
+        <input type="file" id="galleryInput" [accept]="accept"
+               multiple (change)="onFileInput($event)" hidden>
+
+        <!-- Selected previews -->
+        <div class="pending" *ngIf="pending.length">
+          <div class="pending-head">
+            <span>{{ pending.length }} file(s) selected</span>
+            <button type="button" class="link-btn" (click)="clearPending()" [disabled]="uploadProgress !== null">Clear all</button>
+          </div>
+          <div class="pending-grid">
+            <div class="pending-item" *ngFor="let p of pending; let i = index">
+              <video *ngIf="p.isVideo" [src]="p.preview" muted preload="metadata"></video>
+              <img *ngIf="!p.isVideo" [src]="p.preview" [alt]="p.file.name">
+              <button type="button" class="remove" (click)="removePending(i)" title="Remove"
+                      [disabled]="uploadProgress !== null">✕</button>
+              <small>{{ p.isVideo ? '🎬 ' : '' }}{{ formatSize(p.file.size) }}</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Details -->
+      <form [formGroup]="form" (ngSubmit)="upload()" class="gm-form">
+        <div class="form-group">
+          <label>Category *</label>
+          <select formControlName="category">
+            <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Title <span class="opt">(optional, applies to all selected)</span></label>
+          <input type="text" formControlName="title" maxlength="120" placeholder="e.g. Hanuman Jayanti 2026">
+        </div>
+        <div class="form-group">
+          <label>Description <span class="opt">(optional)</span></label>
+          <textarea formControlName="description" rows="3" maxlength="500" placeholder="Short note about these files..."></textarea>
+        </div>
+
+        <div class="progress" *ngIf="uploadProgress !== null">
+          <div class="bar" [style.width.%]="uploadProgress"></div>
+          <span>{{ uploadProgress }}%</span>
+        </div>
+
+        <button type="submit" class="btn-upload" [disabled]="!pending.length || uploadProgress !== null">
+          {{ uploadProgress !== null ? 'Uploading...' : '⬆️ Upload ' + (pending.length || '') + ' File(s)' }}
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══ Published items ═══ -->
+  <div class="gm-card">
+    <div class="gm-card-header">
+      <span class="gm-icon">🗂️</span>
+      <h2>Published Photos & Videos <span class="count">({{ images.length }})</span></h2>
+      <select class="filter" [value]="filterCategory" (change)="setFilter($any($event.target).value)">
+        <option value="">All categories</option>
+        <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
+      </select>
+    </div>
+
+    <div class="empty" *ngIf="images.length === 0">Nothing published yet. Upload some above!</div>
+
+    <div class="manage-grid">
+      <div class="manage-item" *ngFor="let img of images">
+        <a [href]="gallery.imageSrc(img)" target="_blank" rel="noopener">
+          <video *ngIf="gallery.isVideo(img)" [src]="gallery.imageSrc(img) + '#t=0.1'" muted preload="metadata"></video>
+          <img *ngIf="!gallery.isVideo(img)" [src]="gallery.imageSrc(img)" [alt]="img.title || img.category" loading="lazy">
+        </a>
+
+        <!-- View mode -->
+        <div class="meta" *ngIf="editingId !== img._id">
+          <span class="badge">{{ gallery.isVideo(img) ? '🎬 ' : '' }}{{ img.category }}</span>
+          <strong [title]="img.title">{{ img.title || 'Untitled' }}</strong>
+          <small>{{ img.uploaderName ? 'By ' + img.uploaderName + ' · ' : '' }}{{ img.createdAt | date:'mediumDate' }}</small>
+          <div class="actions">
+            <button class="btn-edit" (click)="startEdit(img)">✏️ Edit</button>
+            <button class="btn-del" (click)="deleteImage(img)">🗑️ Delete</button>
+          </div>
+        </div>
+
+        <!-- Edit mode -->
+        <form class="meta edit" *ngIf="editingId === img._id" [formGroup]="editForm" (ngSubmit)="saveEdit(img)">
+          <select formControlName="category">
+            <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
+          </select>
+          <input type="text" formControlName="title" placeholder="Title" maxlength="120">
+          <textarea formControlName="description" rows="2" placeholder="Description" maxlength="500"></textarea>
+          <div class="actions">
+            <button type="submit" class="btn-edit">💾 Save</button>
+            <button type="button" class="btn-cancel" (click)="cancelEdit()">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

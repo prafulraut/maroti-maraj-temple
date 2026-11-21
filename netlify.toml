@@ -1,0 +1,24 @@
+[build]
+  # Angular site + backend dependencies (needed by the API function)
+  command   = "npm --prefix backend install && npm run build"
+  publish   = "dist/maroti-maharaj-temple"
+  functions = "netlify/functions"
+
+[build.environment]
+  NODE_VERSION = "16"
+
+[functions]
+  node_bundler = "zisi"
+
+# API → Netlify Function (Express app in backend/)
+[[redirects]]
+  from   = "/api/*"
+  to     = "/.netlify/functions/api/api/:splat"
+  status = 200
+  force  = true
+
+# Angular routing: every other URL loads the app
+[[redirects]]
+  from   = "/*"
+  to     = "/index.html"
+  status = 200

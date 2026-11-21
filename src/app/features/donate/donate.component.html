@@ -1,0 +1,42 @@
+<div class="donate-page">
+  <div class="hero">
+    <span class="hero-icon">🙏</span>
+    <h1>{{ 'DONATE.TITLE' | translate }}</h1>
+    <p>{{ 'DONATE.SUBTITLE' | translate }}</p>
+  </div>
+
+  <!-- Visitors only see how to pay. Donations are recorded by the admin
+       (Admin panel → Donations → "+ Record Donation"). -->
+  <div class="pay-layout">
+    <section class="card pay-card qr-card">
+      <h3>📷 {{ 'DONATE.SCAN_QR' | translate }}</h3>
+      <img class="qr-img" src="assets/images/upi-qr.jpg" alt="UPI QR code - gpay-11263400465@okbizaxis" loading="lazy" />
+
+      <div class="pay-block" *ngIf="config.upiId">
+        <h4>📱 {{ 'DONATE.UPI' | translate }}</h4>
+        <p class="upi-id">{{ config.upiId }}</p>
+        <p class="muted">{{ config.payeeName }}</p>
+        <a class="btn btn-primary btn-block" [href]="upiLink" *ngIf="upiLink">{{ 'DONATE.PAY_UPI' | translate }}</a>
+        <small class="muted">{{ 'DONATE.UPI_HINT' | translate }}</small>
+      </div>
+    </section>
+
+    <section class="card pay-card">
+      <h3>{{ 'DONATE.HOW_TO_PAY' | translate }}</h3>
+
+      <div class="pay-block" *ngIf="config.bankDetails">
+        <h4>🏦 {{ 'DONATE.BANK_TRANSFER' | translate }}</h4>
+        <pre>{{ config.bankDetails }}</pre>
+      </div>
+
+      <div class="pay-block">
+        <h4>🛕 {{ 'DONATE.AT_TEMPLE' | translate }}</h4>
+        <p class="muted">{{ 'DONATE.AT_TEMPLE_DESC' | translate }}</p>
+      </div>
+
+      <div class="pay-block" *ngIf="isLoggedIn">
+        <a class="btn btn-outline btn-block" routerLink="/dashboard">{{ 'DASHBOARD.MY_DONATIONS' | translate }}</a>
+      </div>
+    </section>
+  </div>
+</div>

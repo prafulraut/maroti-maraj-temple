@@ -1,0 +1,274 @@
+<div class="dm">
+  <p class="flash" *ngIf="msg" [class.err]="msgType === 'err'">{{ msg }}</p>
+
+  <!-- Pending alert -->
+  <div class="pending-alert" *ngIf="pendingCount > 0">
+    <span>⏳ <b>{{ pendingCount }}</b> online donation{{ pendingCount > 1 ? 's are' : ' is' }} waiting for payment confirmation.</span>
+    <button class="btn btn-sm btn-warn" (click)="showPending()">Review now</button>
+  </div>
+
+  <!-- ─── Period selector ─────────────────────────────────────────────────── -->
+  <div class="panel">
+    <div class="view-tabs">
+      <button [class.active]="view === 'day'" (click)="setView('day')">📅 Day</button>
+      <button [class.active]="view === 'month'" (click)="setView('month')">🗓️ Month</button>
+      <button [class.active]="view === 'year'" (click)="setView('year')">📆 Year</button>
+      <button [class.active]="view === 'palkhi'" (click)="setView('palkhi')">🪔 Palkhi day-wise</button>
+      <button [class.active]="view === 'range'" (click)="setView('range')">↔️ Custom range</button>
+    </div>
+
+    <div class="period-row">
+      <button class="nav-btn" (click)="shift(-1)" *ngIf="view !== 'range'" title="Previous">◀</button>
+
+      <input *ngIf="view === 'day'" type="date" [value]="day"
+             (change)="day = $any($event.target).value; load()">
+      <input *ngIf="view === 'month'" type="month" [value]="month"
+             (change)="month = $any($event.target).value; load()">
+      <select *ngIf="view === 'year' || view === 'palkhi'" [value]="year"
+              (change)="year = +$any($event.target).value; load()">
+        <option *ngFor="let y of years" [value]="y" [selected]="y === year">{{ y }}</option>
+      </select>
+      <select *ngIf="view === 'palkhi'" [value]="palkhiDayFilter"
+              (change)="palkhiDayFilter = $any($event.target).value; load()">
+        <option value="">All Palkhi days</option>
+        <option *ngFor="let d of palkhiDays" [value]="d" [selected]="'' + d === palkhiDayFilter">
+          Day {{ d }}{{ palkhiDate(d) ? ' (' + palkhiDate(d) + ')' : '' }}
+        </option>
+      </select>
+      <ng-container *ngIf="view === 'range'">
+        <label class="inline">From <input type="date" [value]="rangeFrom" (change)="rangeFrom = $any($event.target).value; load()"></label>
+        <label class="inline">To <input type="date" [value]="rangeTo" (change)="rangeTo = $any($event.target).value; load()"></label>
+      </ng-container>
+
+      <button class="nav-btn" (click)="shift(1)" *ngIf="view !== 'range'" title="Next">▶</button>
+      <button class="btn btn-sm btn-ghost" (click)="goToday()" *ngIf="view !== 'range' && view !== 'palkhi'">Today</button>
+
+      <h3 class="period-label">{{ periodLabel }}</h3>
+    </div>
+
+    <div class="filter-row">
+      <select [value]="status" (change)="status = $any($event.target).value; load()">
+        <option value="">All statuses</option>
+        <option *ngFor="let s of statuses" [value]="s" [selected]="s === status">{{ s }}</option>
+      </select>
+      <select [value]="purpose" (change)="purpose = $any($event.target).value; load()">
+        <option value="">All purposes</option>
+        <option *ngFor="let p of purposes" [value]="p" [selected]="p === purpose">{{ p }}</option>
+      </select>
+      <select [value]="paymentMode" (change)="paymentMode = $any($event.target).value; load()">
+        <option value="">All payment modes</option>
+        <option *ngFor="let m of modes" [value]="m" [selected]="m === paymentMode">{{ m }}</option>
+      </select>
+      <input class="search" type="search" placeholder="Search name, phone, receipt no…"
+             [value]="search" (input)="search = $any($event.target).value" (keyup.enter)="load()" (search)="load()">
+      <button class="btn btn-sm btn-ghost" (click)="clearFilters()">Clear</button>
+      <span class="spacer"></span>
+      <button class="btn btn-sm btn-ghost" (click)="exportCsv()" [disabled]="!donations.length">⬇️ Export CSV</button>
+      <button class="btn btn-sm btn-orange" (click)="openNew()" *ngIf="!showForm">+ Record Donation</button>
+    </div>
+  </div>
+
+  <!-- ─── Add / Edit form ─────────────────────────────────────────────────── -->
+  <form class="panel d-form" *ngIf="showForm" [formGroup]="form" (ngSubmit)="save()">
+    <h3>{{ editingId ? 'Edit Donation' : 'Record Donation (cash / cheque / Palkhi collection)' }}</h3>
+
+    <div class="grid">
+      <label>Donor name *
+        <input type="text" formControlName="name">
+        <small class="err" *ngIf="invalid('name')">Required</small>
+      </label>
+      <label>Mobile
+        <input type="tel" maxlength="10" formControlName="phone">
+        <small class="err" *ngIf="invalid('phone')">10 digits</small>
+      </label>
+      <label>Email
+        <input type="email" formControlName="email">
+      </label>
+      <label>City / Address
+        <input type="text" formControlName="address">
+      </label>
+
+      <label>Amount (₹) *
+        <input type="number" min="1" formControlName="amount">
+        <small class="err" *ngIf="invalid('amount')">Min ₹1</small>
+      </label>
+      <label>Purpose *
+        <select formControlName="purpose">
+          <option *ngFor="let p of purposes" [value]="p">{{ p }}</option>
+        </select>
+      </label>
+      <label>Date *
+        <input type="date" formControlName="donationDate">
+      </label>
+      <label>Status *
+        <select formControlName="paymentStatus">
+          <option *ngFor="let s of statuses" [value]="s">{{ s }}</option>
+        </select>
+      </label>
+
+      <label>Payment mode *
+        <select formControlName="paymentMode">
+          <option *ngFor="let m of modes" [value]="m">{{ m }}</option>
+        </select>
+      </label>
+      <label>Txn / Cheque / Ref no.
+        <input type="text" formControlName="transactionId">
+      </label>
+      <label>Palkhi day
+        <select formControlName="palkhiDay">
+          <option value="">— Not a Palkhi donation —</option>
+          <option *ngFor="let d of palkhiDays" [value]="'' + d">
+            Day {{ d }}{{ palkhiDate(d) ? ' (' + palkhiDate(d) + ')' : '' }}
+          </option>
+        </select>
+      </label>
+      <label>Palkhi family / stop
+        <select formControlName="palkhiStop" [attr.disabled]="!form.value.palkhiDay ? true : null">
+          <option value="">— None —</option>
+          <option *ngFor="let s of stopsForDay(form.value.palkhiDay)" [value]="s._id">
+            {{ s.familyName }} · {{ s.city }}{{ s.visitType !== 'visit' ? ' (' + s.visitType + ')' : '' }}
+          </option>
+        </select>
+      </label>
+    </div>
+
+    <label>Message / Note
+      <textarea rows="2" formControlName="message"></textarea>
+    </label>
+    <label class="check"><input type="checkbox" formControlName="isAnonymous"> Anonymous donor</label>
+
+    <div class="actions">
+      <button type="submit" class="btn btn-sm btn-orange" [disabled]="saving">
+        {{ saving ? 'Saving…' : (editingId ? 'Save Changes' : 'Save Donation') }}
+      </button>
+      <button type="button" class="btn btn-sm btn-ghost" (click)="cancel()">Cancel</button>
+    </div>
+  </form>
+
+  <!-- ─── Summary cards ───────────────────────────────────────────────────── -->
+  <div class="cards">
+    <div class="sum-card green">
+      <span>Received (Completed)</span>
+      <strong>₹{{ (summary.totals?.completed || 0) | number }}</strong>
+    </div>
+    <div class="sum-card amber">
+      <span>Pending confirmation</span>
+      <strong>₹{{ (summary.totals?.pending || 0) | number }}</strong>
+    </div>
+    <div class="sum-card blue">
+      <span>Donations</span>
+      <strong>{{ summary.totals?.count || 0 }}</strong>
+    </div>
+    <div class="sum-card purple">
+      <span>Unique donors</span>
+      <strong>{{ summary.totals?.uniqueDonors || 0 }}</strong>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <!-- Breakdown -->
+    <div class="panel" *ngIf="view !== 'day'">
+      <h3>{{ breakdownTitle }} collection <small class="muted">· click a row to open it</small></h3>
+      <div class="table-wrap">
+        <table class="t">
+          <thead>
+            <tr>
+              <th>{{ view === 'palkhi' ? 'Palkhi day' : (summary.groupBy === 'month' ? 'Month' : 'Date') }}</th>
+              <th *ngIf="view === 'palkhi'">Families</th>
+              <th class="num">Donations</th>
+              <th class="num">Received</th>
+              <th class="num">Pending</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let g of summary.groups" class="clickable" (click)="drill(g)">
+              <td>{{ groupLabel(g) }}</td>
+              <td *ngIf="view === 'palkhi'">{{ familiesOnDay(g.key) }}</td>
+              <td class="num">{{ g.count }}</td>
+              <td class="num strong">₹{{ g.completed | number }}</td>
+              <td class="num muted">{{ g.pending ? '₹' + (g.pending | number) : '—' }}</td>
+            </tr>
+            <tr *ngIf="!summary.groups?.length">
+              <td [attr.colspan]="view === 'palkhi' ? 5 : 4" class="empty">
+                {{ view === 'palkhi' ? 'No donations tagged to a Palkhi day in ' + year + '.' : 'No donations in this period.' }}
+              </td>
+            </tr>
+          </tbody>
+          <tfoot *ngIf="summary.groups?.length">
+            <tr>
+              <td>Total</td>
+              <td *ngIf="view === 'palkhi'"></td>
+              <td class="num">{{ summary.totals?.count }}</td>
+              <td class="num strong">₹{{ (summary.totals?.completed || 0) | number }}</td>
+              <td class="num">₹{{ (summary.totals?.pending || 0) | number }}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+    <!-- Purpose / mode split -->
+    <div class="panel side">
+      <h3>By purpose</h3>
+      <div class="split" *ngFor="let p of summary.byPurpose">
+        <span>{{ p.key }} <small class="muted">({{ p.count }})</small></span><b>₹{{ p.total | number }}</b>
+      </div>
+      <p class="muted" *ngIf="!summary.byPurpose?.length">—</p>
+
+      <h3 class="mt">By payment mode</h3>
+      <div class="split" *ngFor="let m of summary.byMode">
+        <span>{{ m.key }} <small class="muted">({{ m.count }})</small></span><b>₹{{ m.total | number }}</b>
+      </div>
+      <p class="muted" *ngIf="!summary.byMode?.length">—</p>
+    </div>
+  </div>
+
+  <!-- ─── Donations list ──────────────────────────────────────────────────── -->
+  <div class="panel">
+    <h3>Donations <span class="muted">({{ donations.length }})</span></h3>
+    <p *ngIf="loading" class="muted">Loading…</p>
+    <div class="table-wrap" *ngIf="!loading">
+      <table class="t donation-list">
+        <thead>
+          <tr>
+            <th>Receipt</th>
+            <th>Date</th>
+            <th>Donor</th>
+            <th>Purpose</th>
+            <th class="num">Amount</th>
+            <th>Mode</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let d of donations">
+            <td class="mono">{{ d.receiptNo || '—' }}<div class="sub">{{ d.source === 'online' ? '🌐 online' : '🧾 counter' }}</div></td>
+            <td class="nowrap">{{ (d.donationDate || d.createdAt) | date:'dd MMM yyyy' }}</td>
+            <td>
+              {{ d.name }} <span class="tag" *ngIf="d.isAnonymous">anon</span>
+              <div class="sub">{{ d.phone }}{{ d.phone && d.email ? ' · ' : '' }}{{ d.email }}</div>
+            </td>
+            <td>
+              {{ d.purpose }}
+              <div class="sub" *ngIf="d.palkhiDay">🪔 Day {{ d.palkhiDay }}{{ d.palkhiStop?.familyName ? ' · ' + d.palkhiStop.familyName : '' }}</div>
+            </td>
+            <td class="num strong">₹{{ d.amount | number }}</td>
+            <td>{{ d.paymentMode }}<div class="sub" *ngIf="d.transactionId">{{ d.transactionId }}</div></td>
+            <td><span class="status" [ngClass]="d.paymentStatus?.toLowerCase()">{{ d.paymentStatus }}</span></td>
+            <td class="nowrap">
+              <button class="act ok" *ngIf="d.paymentStatus !== 'Completed'" (click)="setStatus(d, 'Completed')" title="Confirm payment received">✔ Confirm</button>
+              <button class="act bad" *ngIf="d.paymentStatus === 'Pending'" (click)="setStatus(d, 'Failed')" title="Payment not received">✖ Reject</button>
+              <button class="act" (click)="print(d)" title="Print receipt">🖨️</button>
+              <button class="act" (click)="edit(d)" title="Edit">✏️</button>
+              <button class="act bad" (click)="remove(d)" title="Delete">🗑️</button>
+            </td>
+          </tr>
+          <tr *ngIf="!donations.length">
+            <td colspan="8" class="empty">No donations found for {{ periodLabel }}.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

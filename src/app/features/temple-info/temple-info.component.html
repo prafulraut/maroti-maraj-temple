@@ -1,0 +1,294 @@
+<div class="temple-info-wrapper">
+
+  <!-- ─── Temple Info page: banner + quick links ─────────────────────────── -->
+  <section class="page-banner" *ngIf="!isHome">
+    <div class="hero-bg" aria-hidden="true"></div>
+    <div class="hero-shade"></div>
+    <div class="banner-inner">
+      <img src="assets/images/maharaj.png" alt="" class="banner-photo" width="96" height="96">
+      <div>
+        <h1>{{ 'NAV.TEMPLE_INFO' | translate }}</h1>
+        <p class="banner-title">{{ 'INFO.HERO_TITLE' | translate }}</p>
+        <p class="banner-place">📍 {{ 'INFO.HERO_PLACE' | translate }}</p>
+      </div>
+    </div>
+    <nav class="info-links" aria-label="Sections">
+      <button type="button" *ngFor="let l of infoLinks" (click)="scrollTo(l.id)">{{ l.key | translate }}</button>
+    </nav>
+  </section>
+
+  <!-- Hero Section: Shri Sant Maroti Maharaj photo (home page only) -->
+  <section class="hero-section" *ngIf="isHome">
+    <div class="hero-bg" aria-hidden="true"></div>
+    <div class="hero-shade"></div>
+
+    <div class="hero-inner">
+    <div class="hero-content">
+      <img src="assets/logo.svg" alt="" class="hero-logo" width="110" height="110">
+      <p class="hero-welcome">{{ 'INFO.HERO_WELCOME' | translate }}</p>
+      <h1>{{ 'INFO.HERO_TITLE' | translate }}</h1>
+      <p class="hero-place">📍 {{ 'INFO.HERO_PLACE' | translate }}</p>
+      <p class="hero-desc">{{ 'INFO.HERO_DESC' | translate }}</p>
+      <div class="hero-actions">
+        <button type="button" class="hero-btn primary" (click)="scrollTo('visit')">🛕 {{ 'INFO.HERO_CTA_VISIT' | translate }}</button>
+        <a routerLink="/gallery" class="hero-btn ghost">📸 {{ 'INFO.HERO_CTA_GALLERY' | translate }}</a>
+      </div>
+    </div>
+
+    <figure class="hero-photo">
+      <img src="assets/images/maharaj.png" [alt]="'INFO.HERO_TITLE' | translate" width="496" height="654">
+      <figcaption>🙏 {{ 'INFO.JAI' | translate }} 🙏</figcaption>
+    </figure>
+    </div>
+
+    <svg class="hero-wave" viewBox="0 0 1440 80" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M0,40 C240,80 480,0 720,30 C960,60 1200,10 1440,40 L1440,80 L0,80 Z" fill="#fafaf9"/>
+    </svg>
+  </section>
+
+  <!-- Highlights strip -->
+  <div class="stats-strip" *ngIf="isHome">
+    <div class="stat"><span class="stat-num">1880</span><span class="stat-label">{{ 'INFO.STAT_VARI' | translate }}</span></div>
+    <div class="stat"><span class="stat-num">85</span><span class="stat-label">{{ 'INFO.STAT_VARIS' | translate }}</span></div>
+    <div class="stat"><span class="stat-num">50</span><span class="stat-label">{{ 'INFO.STAT_PUNYATITHI' | translate }}</span></div>
+    <div class="stat"><span class="stat-num">04:30</span><span class="stat-label">{{ 'INFO.STAT_DAILY' | translate }}</span></div>
+  </div>
+
+  <div class="content-container" [class.info-page]="!isHome">
+
+    <!-- About & History -->
+    <section class="info-section about-section" id="about">
+      <div class="text-content">
+        <h2>{{ 'INFO.ABOUT_TITLE' | translate }}</h2>
+        <div class="divider"></div>
+        <p>{{ 'INFO.ABOUT_P1' | translate }}</p>
+        <p>{{ 'INFO.ABOUT_P2' | translate }}</p>
+        <a *ngIf="isHome" routerLink="/temple-info" class="view-all-btn more-info-btn">🛕 {{ 'NAV.TEMPLE_INFO' | translate }} →</a>
+        <p class="jai">🙏 {{ 'INFO.JAI' | translate }} 🙏</p>
+      </div>
+      <div class="image-content">
+        <img src="assets/images/temple.webp" [alt]="'INFO.HERO_TITLE' | translate" class="history-image" width="765" height="1020" loading="lazy">
+      </div>
+    </section>
+
+    <!-- Timings & Aarti -->
+    <section class="info-section timings-section" id="timings">
+      <div class="timings-card">
+        <h2>{{ 'INFO.TIMINGS_TITLE' | translate }}</h2>
+        <div class="divider center-divider"></div>
+        <ul class="timing-list">
+          <li><span>{{ 'INFO.MORNING' | translate }}:</span> 04:30 AM - 12:30 PM</li>
+          <li><span>{{ 'INFO.EVENING' | translate }}:</span> 04:00 PM - 09:30 PM</li>
+          <li class="highlight">{{ 'INFO.OPEN_ALL_DAYS' | translate }}</li>
+        </ul>
+      </div>
+
+      <div class="aarti-card">
+        <h2>{{ 'INFO.AARTI_TITLE' | translate }}</h2>
+        <div class="divider center-divider"></div>
+        <div class="aarti-grid">
+          <div class="aarti-item" *ngFor="let aarti of aartiSchedule; let i = index">
+            <div class="time">{{ aarti.time }}</div>
+            <div class="details">
+              <h4>{{ 'INFO.AARTI.' + (['MANGALA', 'SHRINGAR', 'RAJBHOG', 'SANDHYA', 'SHAYAN'][i]) | translate }}</h4>
+              <p>{{ 'INFO.AARTI.' + (['MANGALA', 'SHRINGAR', 'RAJBHOG', 'SANDHYA', 'SHAYAN'][i]) + '_DESC' | translate }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Events & Programs -->
+    <section class="info-section programs-section" id="programs" *ngIf="!isHome">
+      <h2>{{ 'INFO.PROGRAMS_TITLE' | translate }}</h2>
+      <div class="divider center-divider"></div>
+      <p class="section-subtitle">{{ 'INFO.PROGRAMS_SUBTITLE' | translate }}</p>
+
+      <div class="programs-grid">
+        <div class="program-card" *ngFor="let p of programs">
+          <div class="program-icon">{{ p.icon }}</div>
+          <h3>{{ 'INFO.PROGRAMS.' + p.key | translate }}</h3>
+          <p>{{ 'INFO.PROGRAMS.' + p.key + '_DESC' | translate }}</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Nagdwar Vari route -->
+    <section class="info-section vari-section" id="vari" *ngIf="!isHome">
+      <h2>{{ 'INFO.VARI_TITLE' | translate }}</h2>
+      <div class="divider center-divider"></div>
+      <p class="section-subtitle">{{ 'INFO.VARI_DESC' | translate }}</p>
+
+      <ol class="vari-route">
+        <li *ngFor="let stop of nagdwarRoute; let i = index">
+          <span class="vari-day">{{ 'INFO.VARI_DAY' | translate }} {{ i + 1 }}</span>
+          <span class="vari-date">{{ stop.date }}</span>
+          <span class="vari-stop">{{ 'INFO.VARI.' + stop.key | translate }}</span>
+        </li>
+      </ol>
+      <p class="vari-note">{{ 'INFO.VARI_NOTE' | translate }}</p>
+    </section>
+
+    <!-- Board of Trustees -->
+    <section class="info-section priests-section" id="trustees" *ngIf="!isHome">
+      <h2>{{ 'INFO.TRUSTEES_TITLE' | translate }}</h2>
+      <div class="divider center-divider"></div>
+      <p class="section-subtitle">{{ 'INFO.TRUSTEES_SUBTITLE' | translate }}</p>
+
+      <div class="priests-grid">
+        <div class="priest-card" *ngFor="let t of officeBearers">
+          <div class="priest-avatar">🙏</div>
+          <h3>{{ trusteeName(t) }}</h3>
+          <p class="role">{{ 'INFO.ROLE.' + t.roleKey | translate }}</p>
+          <a *ngIf="t.phone" class="experience phone-link" [href]="'tel:+91' + t.phone">📞 +91 {{ t.phone }}</a>
+        </div>
+      </div>
+
+      <h3 class="members-title">{{ 'INFO.ROLE.MEMBERS' | translate }}</h3>
+      <ul class="members-list">
+        <li *ngFor="let m of members">{{ trusteeName(m) }}</li>
+      </ul>
+    </section>
+
+    <!-- Gallery -->
+    <section class="info-section gallery-section" *ngIf="isHome">
+      <h2>{{ 'INFO.GALLERY_TITLE' | translate }}</h2>
+      <div class="divider center-divider"></div>
+
+      <div class="gallery-grid">
+        <a class="gallery-item" *ngFor="let img of galleryImages; let i = index" routerLink="/gallery" [class.featured]="i === 0">
+          <img [src]="img.url" [alt]="img.alt" class="gallery-image" loading="lazy">
+          <div class="overlay">
+            <span>{{ img.label || (img.labelKey! | translate) }}</span>
+          </div>
+        </a>
+      </div>
+
+      <div class="view-all">
+        <a routerLink="/gallery" class="view-all-btn">{{ 'GALLERY_PAGE.VIEW_ALL' | translate }} →</a>
+      </div>
+    </section>
+
+    <!-- YouTube channel (home page) -->
+    <section class="info-section youtube-section" *ngIf="isHome">
+      <a class="youtube-card" [href]="youtubeUrl" target="_blank" rel="noopener">
+        <span class="yt-logo" aria-hidden="true">
+          <svg viewBox="0 0 28 20" width="64" height="46"><rect width="28" height="20" rx="5" fill="#ff0000"/><path d="M11.2 5.6v8.8L18.8 10z" fill="#fff"/></svg>
+        </span>
+        <span class="yt-text">
+          <strong>{{ 'INFO.YOUTUBE_TITLE' | translate }}</strong>
+          <span class="yt-handle">{{ youtubeHandle }}</span>
+          <span class="yt-desc">{{ 'INFO.YOUTUBE_DESC' | translate }}</span>
+        </span>
+        <span class="yt-btn">▶ {{ 'INFO.YOUTUBE_CTA' | translate }}</span>
+      </a>
+    </section>
+
+    <!-- Location Section -->
+    <section class="info-section location-section" id="visit">
+      <h2>{{ 'LOCATION.TITLE' | translate }}</h2>
+      <div class="divider center-divider"></div>
+      <p class="section-subtitle">{{ 'LOCATION.SUBTITLE' | translate }}</p>
+
+      <div class="location-grid">
+        <div class="map-container">
+          <iframe
+            [src]="mapEmbedUrl"
+            title="Shri Sant Maroti Maharaj Sevashram, Salbardi"
+            width="100%"
+            height="400"
+            style="border:0; border-radius: 16px;"
+            allowfullscreen=""
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade">
+          </iframe>
+        </div>
+
+        <div class="location-details">
+          <div class="location-card">
+            <div class="location-item">
+              <span class="location-icon">📍</span>
+              <div>
+                <h4>{{ 'LOCATION.ADDRESS_TITLE' | translate }}</h4>
+                <p>{{ 'LOCATION.ADDRESS_LINE1' | translate }}</p>
+                <p>{{ 'LOCATION.ADDRESS_LINE2' | translate }}</p>
+                <a class="directions-link" [href]="directionsUrl" target="_blank" rel="noopener">🧭 {{ 'LOCATION.DIRECTIONS' | translate }}</a>
+              </div>
+            </div>
+
+            <div class="location-item">
+              <span class="location-icon">📞</span>
+              <div>
+                <h4>{{ 'LOCATION.PHONE_TITLE' | translate }}</h4>
+                <p>{{ 'INFO.ROLE.SECRETARY' | translate }}: <a href="tel:+919922096855">+91 99220 96855</a></p>
+              </div>
+            </div>
+
+            <div class="location-item">
+              <span class="location-icon">✉️</span>
+              <div>
+                <h4>{{ 'LOCATION.EMAIL_TITLE' | translate }}</h4>
+                <p><a [href]="'mailto:' + contactEmail">{{ contactEmail }}</a></p>
+              </div>
+            </div>
+
+            <div class="location-item">
+              <span class="location-icon">▶️</span>
+              <div>
+                <h4>{{ 'LOCATION.YOUTUBE_TITLE' | translate }}</h4>
+                <p><a [href]="youtubeUrl" target="_blank" rel="noopener">{{ youtubeHandle }}</a></p>
+              </div>
+            </div>
+
+            <div class="location-item">
+              <span class="location-icon">🕐</span>
+              <div>
+                <h4>{{ 'LOCATION.HOURS_TITLE' | translate }}</h4>
+                <p>{{ 'INFO.MORNING' | translate }}: 04:30 AM - 12:30 PM</p>
+                <p>{{ 'INFO.EVENING' | translate }}: 04:00 PM - 09:30 PM</p>
+              </div>
+            </div>
+
+            <div class="location-item">
+              <span class="location-icon">🚌</span>
+              <div>
+                <h4>{{ 'LOCATION.HOW_TO_REACH' | translate }}</h4>
+                <p>{{ 'LOCATION.HOW_TO_REACH_DESC' | translate }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Feedback (आपले मनोगत) -->
+    <section class="info-section feedback-section" *ngIf="isHome">
+      <h2>{{ 'INFO.FEEDBACK_TITLE' | translate }}</h2>
+      <div class="divider center-divider"></div>
+      <p class="section-subtitle">{{ 'INFO.FEEDBACK_SUBTITLE' | translate }}</p>
+
+      <form class="feedback-form" [formGroup]="feedbackForm" (ngSubmit)="sendFeedback()" novalidate>
+        <div class="form-row">
+          <label>
+            {{ 'INFO.FEEDBACK_NAME' | translate }} *
+            <input type="text" formControlName="name" maxlength="80">
+            <small class="error" *ngIf="feedbackForm.get('name')?.touched && feedbackForm.get('name')?.invalid">{{ 'INFO.FEEDBACK_REQUIRED' | translate }}</small>
+          </label>
+          <label>
+            {{ 'INFO.FEEDBACK_PHONE' | translate }}
+            <input type="tel" formControlName="phone" maxlength="15">
+            <small class="error" *ngIf="feedbackForm.get('phone')?.touched && feedbackForm.get('phone')?.invalid">{{ 'INFO.FEEDBACK_PHONE_INVALID' | translate }}</small>
+          </label>
+        </div>
+        <label>
+          {{ 'INFO.FEEDBACK_MESSAGE' | translate }} *
+          <textarea rows="5" formControlName="message" maxlength="1000"></textarea>
+          <small class="error" *ngIf="feedbackForm.get('message')?.touched && feedbackForm.get('message')?.invalid">{{ 'INFO.FEEDBACK_REQUIRED' | translate }}</small>
+        </label>
+        <button type="submit" class="view-all-btn">{{ 'INFO.FEEDBACK_SEND' | translate }}</button>
+        <p class="feedback-thanks" *ngIf="feedbackSent">{{ 'INFO.FEEDBACK_THANKS' | translate }}</p>
+      </form>
+    </section>
+
+  </div>
+</div>

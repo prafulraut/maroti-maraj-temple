@@ -1,0 +1,66 @@
+<nav class="navbar">
+  <div class="navbar-container">
+    <a routerLink="/" class="navbar-logo">
+      <img src="assets/logo.svg" alt="" class="logo-icon" width="44" height="44">
+      <span class="logo-text">{{ 'NAV.TITLE' | translate }}</span>
+    </a>
+
+    <!-- Hamburger menu for mobile -->
+    <button class="menu-toggle" (click)="toggleMenu()" aria-label="Menu" [attr.aria-expanded]="isMenuOpen">
+      <span class="bar" [class.open]="isMenuOpen"></span>
+      <span class="bar" [class.open]="isMenuOpen"></span>
+      <span class="bar" [class.open]="isMenuOpen"></span>
+    </button>
+
+    <ul class="nav-menu" [class.active]="isMenuOpen">
+      <!-- Public Links -->
+      <li class="nav-item">
+        <a routerLink="/" class="nav-links" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }" (click)="isMenuOpen = false">{{ 'NAV.HOME' | translate }}</a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/temple-info" class="nav-links" routerLinkActive="active-link" (click)="isMenuOpen = false">{{ 'NAV.TEMPLE_INFO' | translate }}</a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/gallery" class="nav-links" routerLinkActive="active-link" (click)="isMenuOpen = false">{{ 'NAV.GALLERY' | translate }}</a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/palkhi-tracker" class="nav-links nav-palkhi" (click)="isMenuOpen = false">🪔 {{ 'NAV.PALKHI_TRACKER' | translate }}</a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/donate" class="nav-links" routerLinkActive="active-link" (click)="isMenuOpen = false">🙏 {{ 'NAV.DONATE' | translate }}</a>
+      </li>
+
+      <!-- Login/Register links are intentionally hidden from visitors.
+           The admin signs in by opening /login directly. -->
+
+      <!-- Logged In Links -->
+      <ng-container *ngIf="currentUser$ | async as user">
+        <!-- User Dashboard -->
+        <li class="nav-item" *ngIf="user.role !== 'admin'">
+          <a routerLink="/dashboard" class="nav-links" (click)="isMenuOpen = false">{{ 'NAV.DASHBOARD' | translate }}</a>
+        </li>
+
+        <!-- Admin Dashboard -->
+        <li class="nav-item" *ngIf="user.role === 'admin'">
+          <a routerLink="/admin" class="nav-links" (click)="isMenuOpen = false">{{ 'NAV.ADMIN_PANEL' | translate }}</a>
+        </li>
+
+        <li class="nav-item user-greeting">
+          <span>{{ 'NAV.HI' | translate }}, {{ user.name.split(' ')[0] }}</span>
+        </li>
+        <li class="nav-item">
+          <a href="#" class="nav-links btn-logout" (click)="logout($event)">{{ 'NAV.LOGOUT' | translate }}</a>
+        </li>
+      </ng-container>
+
+      <!-- Language Switcher -->
+      <li class="nav-item lang-switcher">
+        <select #langSelect (change)="switchLanguage(langSelect.value)" class="lang-select">
+          <option value="en" [selected]="translate.currentLang === 'en'">🌐 English</option>
+          <option value="hi" [selected]="translate.currentLang === 'hi'">🌐 हिन्दी</option>
+          <option value="mr" [selected]="translate.currentLang === 'mr'">🌐 मराठी</option>
+        </select>
+      </li>
+    </ul>
+  </div>
+</nav>

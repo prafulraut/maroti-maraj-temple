@@ -1,0 +1,162 @@
+<div class="tracker-wrapper">
+
+  <!-- Hero Banner -->
+  <div class="tracker-hero">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <div class="diya-icon">🪔</div>
+      <h1>{{ settings?.palkhiTitle || ('PALKHI.DEFAULT_TITLE' | translate) }}</h1>
+      <p *ngIf="settings?.palkhiDate">
+        📅 {{ dayDate(1) | date:'dd MMM yyyy' }}
+        <ng-container *ngIf="days.length > 1"> – {{ dayDate(days[days.length - 1]) | date:'dd MMM yyyy' }} ({{ days.length }} {{ 'PALKHI.DAYS' | translate }})</ng-container>
+      </p>
+      <p *ngIf="settings?.startLocation && settings?.endLocation">
+        📍 {{ settings.startLocation }} → {{ settings.endLocation }}
+      </p>
+      <div class="live-badge" *ngIf="hasActiveStop()">🔴 {{ 'PALKHI.LIVE' | translate }}</div>
+    </div>
+
+    <!-- Admin-uploaded Palkhi Image -->
+    <div class="palkhi-image-frame" *ngIf="settings?.imageUrl">
+      <img [src]="serverBase + settings.imageUrl" alt="Palkhi Image" class="palkhi-img">
+    </div>
+  </div>
+
+  <div class="tracker-body">
+
+    <!-- Description -->
+    <p class="description" *ngIf="settings?.description">{{ settings.description }}</p>
+
+    <!-- Loading -->
+    <div class="loading-state" *ngIf="isLoading">
+      <div class="spinner"></div>
+      <p>{{ 'PALKHI.LOADING' | translate }}</p>
+    </div>
+
+    <!-- No Schedules -->
+    <div class="empty-card" *ngIf="!isLoading && schedules.length === 0">
+      <span>🛕</span>
+      <h3>{{ 'PALKHI.NOT_PUBLISHED' | translate }}</h3>
+      <p>{{ 'PALKHI.CHECK_BACK' | translate }}</p>
+    </div>
+
+    <!-- Schedule Timeline -->
+    <div class="timeline-section" *ngIf="!isLoading && schedules.length > 0">
+      <h2 class="section-title">🗓️ {{ 'PALKHI.ROUTE_TIMINGS' | translate }}</h2>
+
+      <!-- Day tabs -->
+      <div class="day-tabs">
+        <button type="button" *ngFor="let d of days" class="day-tab"
+                [class.active]="selectedDay === d"
+                [class.live]="isDayLive(d)"
+                [class.done]="isDayDone(d)"
+                (click)="selectedDay = d">
+          <span class="day-tab-title">{{ 'PALKHI.DAY' | translate }} {{ d }}</span>
+          <span class="day-tab-date" *ngIf="dayDate(d)">{{ dayDate(d) | date:'EEE, dd MMM' }}</span>
+          <span class="day-tab-flag" *ngIf="isDayLive(d)">🔴 {{ 'PALKHI.LIVE_FLAG' | translate }}</span>
+          <span class="day-tab-flag" *ngIf="!isDayLive(d) && isDayDone(d)">✅ {{ 'PALKHI.DONE_FLAG' | translate }}</span>
+        </button>
+      </div>
+
+      <!-- Day overview: route + meal hosts -->
+      <div class="day-overview">
+        <h3>
+          {{ 'PALKHI.DAY' | translate }} {{ selectedDay }}
+          <small *ngIf="dayDate(selectedDay)">— {{ dayDate(selectedDay) | date:'EEEE, dd MMMM yyyy' }}</small>
+        </h3>
+
+        <div class="route-strip" *ngIf="routeForDay(selectedDay).length">
+          <ng-container *ngFor="let place of routeForDay(selectedDay); let last = last">
+            <span class="route-place">📍 {{ place }}</span>
+            <span class="route-arrow" *ngIf="!last">➜</span>
+          </ng-container>
+        </div>
+
+        <div class="meal-cards">
+          <div class="meal-card lunch" [class.empty]="!mealHost(selectedDay, 'lunch')">
+            <span class="meal-icon">🍛</span>
+            <div>
+              <small>{{ 'PALKHI.LUNCH' | translate }}</small>
+              <strong>{{ mealHost(selectedDay, 'lunch')?.familyName || ('PALKHI.TBA' | translate) }}</strong>
+              <p *ngIf="mealHost(selectedDay, 'lunch') as l">{{ l.city }} · {{ l.arrivalTime }}</p>
+            </div>
+          </div>
+          <div class="meal-card dinner" [class.empty]="!mealHost(selectedDay, 'dinner')">
+            <span class="meal-icon">🍽️</span>
+            <div>
+              <small>{{ 'PALKHI.DINNER' | translate }}</small>
+              <strong>{{ mealHost(selectedDay, 'dinner')?.familyName || ('PALKHI.TBA' | translate) }}</strong>
+              <p *ngIf="mealHost(selectedDay, 'dinner') as dn">{{ dn.city }} · {{ dn.arrivalTime }}</p>
+            </div>
+          </div>
+          <div class="meal-card visits">
+            <span class="meal-icon">🏠</span>
+            <div>
+              <small>{{ 'PALKHI.HOME_VISITS' | translate }}</small>
+              <strong>{{ visitCount(selectedDay) }} {{ 'PALKHI.HOMES' | translate }}</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="empty-card" *ngIf="stopsForDay(selectedDay).length === 0">
+        <span>🛕</span>
+        <h3>{{ 'PALKHI.NO_STOPS' | translate }} {{ selectedDay }}</h3>
+      </div>
+
+      <div class="timeline">
+        <div class="timeline-item" *ngFor="let stop of stopsForDay(selectedDay); let i = index; let last = last"
+             [class.active]="stop.status === 'in-transit'"
+             [class.done]="stop.status === 'arrived' || stop.status === 'completed'"
+             [class.meal-lunch]="stop.visitType === 'lunch'"
+             [class.meal-dinner]="stop.visitType === 'dinner'">
+
+          <!-- Timeline Dot -->
+          <div class="timeline-dot">
+            <span *ngIf="stop.status === 'in-transit'">🚗</span>
+            <span *ngIf="stop.status === 'arrived' || stop.status === 'completed'">✅</span>
+            <span *ngIf="stop.status === 'pending'">⏳</span>
+          </div>
+
+          <!-- Timeline Line -->
+          <div class="timeline-line" *ngIf="!last"></div>
+
+          <!-- Card -->
+          <div class="stop-card">
+            <div class="meal-ribbon" *ngIf="stop.visitType === 'lunch'">🍛 {{ 'PALKHI.LUNCH_HOST' | translate }}</div>
+            <div class="meal-ribbon" *ngIf="stop.visitType === 'dinner'">🍽️ {{ 'PALKHI.DINNER_HOST' | translate }}</div>
+            <div class="stop-header">
+              <div class="stop-number">#{{ stop.orderIndex || i+1 }}</div>
+              <div class="stop-title">
+                <h3>{{ stop.familyName }}</h3>
+                <p class="city-label">📍 {{ stop.city }}<span *ngIf="stop.address"> — {{ stop.address }}</span></p>
+              </div>
+              <div class="stop-status" [ngClass]="statusClass(stop.status)">
+                {{ statusLabel(stop.status) }}
+              </div>
+            </div>
+
+            <div class="stop-details">
+              <div class="detail-chip">
+                <span class="chip-icon">🕐</span>
+                <div>
+                  <small>{{ 'PALKHI.EXPECTED_ARRIVAL' | translate }}</small>
+                  <strong>{{ stop.arrivalTime }}</strong>
+                </div>
+              </div>
+              <div class="detail-chip">
+                <span class="chip-icon">⏱️</span>
+                <div>
+                  <small>{{ 'PALKHI.JOURNEY_DURATION' | translate }}</small>
+                  <strong>{{ stop.timeTaken }}</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

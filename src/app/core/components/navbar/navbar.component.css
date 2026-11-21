@@ -1,0 +1,244 @@
+.navbar {
+  background: linear-gradient(90deg, rgba(67, 20, 7, 0.94), rgba(28, 25, 23, 0.94));
+  box-shadow: 0 2px 0 rgba(249, 115, 22, 0.55), 0 8px 24px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  height: 70px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 999;
+}
+
+.navbar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 1400px;
+  padding: 0 1.5rem;
+  gap: 1rem;
+}
+
+.navbar-logo {
+  flex-shrink: 0;
+  white-space: nowrap;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.logo-icon {
+  width: 44px;
+  height: 44px;
+  margin-right: 0.65rem;
+  filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.45));
+  transition: transform 0.4s ease;
+}
+
+.navbar-logo:hover .logo-icon {
+  transform: rotate(-8deg) scale(1.06);
+}
+
+.logo-text {
+  background: linear-gradient(90deg, #fde68a, #fdba74);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@media screen and (max-width: 480px) {
+  .logo-text { font-size: 0.95rem; white-space: normal; line-height: 1.2; max-width: 220px; }
+}
+
+.nav-menu {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 0.35rem;
+  list-style: none;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-item {
+  margin: 0;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+}
+
+.nav-links {
+  display: inline-block;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  color: #cbd5e1;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+  padding: 0.5rem;
+}
+
+.nav-links:hover {
+  color: #f97316; /* Saffron hover */
+}
+
+/* Current page */
+.nav-links.active-link {
+  color: #fdba74;
+  box-shadow: inset 0 -2px 0 #f97316;
+}
+
+/* Hamburger turns into an ✕ when open */
+.bar.open:nth-child(1) { transform: translateY(11px) rotate(45deg); }
+.bar.open:nth-child(2) { opacity: 0; }
+.bar.open:nth-child(3) { transform: translateY(-11px) rotate(-45deg); }
+
+.user-greeting {
+  margin-left: 0.5rem;
+  color: #fff;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+}
+
+.btn-register {
+  background: #10b981;
+  color: #fff !important;
+  padding: 0.5rem 1.2rem;
+  border-radius: 8px;
+  transition: background 0.3s ease;
+}
+
+.btn-register:hover {
+  background: #059669;
+}
+
+.btn-logout {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444 !important;
+  padding: 0.5rem 1.2rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.btn-logout:hover {
+  background: #ef4444;
+  color: #fff !important;
+}
+
+/* Mobile Menu Icon */
+.menu-toggle {
+  display: none;
+  flex-direction: column;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+}
+
+.bar {
+  height: 3px;
+  width: 25px;
+  background: #fff;
+  margin: 4px 0;
+  transition: 0.3s;
+  border-radius: 3px;
+}
+
+/* Language Switcher */
+.lang-select {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 0.3rem 0.5rem;
+  border-radius: 6px;
+  outline: none;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.lang-select option {
+  background: #0f172a;
+  color: #fff;
+}
+
+/* Palkhi Nav Link - special saffron glow */
+.nav-palkhi {
+  background: rgba(249, 115, 22, 0.15) !important;
+  border: 1px solid rgba(249, 115, 22, 0.4) !important;
+  border-radius: 6px !important;
+  padding: 0.3rem 0.75rem !important;
+  color: #fdba74 !important;
+  font-weight: 600 !important;
+}
+.nav-palkhi:hover {
+  background: rgba(249, 115, 22, 0.3) !important;
+  color: #fff !important;
+}
+
+/* Responsive */
+/* Logged in there are more links: hide the "Hi, name" chip and tighten
+   spacing on mid-size screens so everything still fits on one line */
+@media screen and (min-width: 1201px) and (max-width: 1440px) {
+  .user-greeting { display: none; }
+  .nav-menu { gap: 0.15rem; }
+  .nav-links { padding: 0.5rem 0.4rem; font-size: 0.9rem; }
+  .btn-logout { padding: 0.45rem 0.8rem; }
+  .navbar-container { padding: 0 1rem; }
+}
+
+/* Hamburger menu once the links no longer fit on one line */
+@media screen and (max-width: 1200px) {
+  .menu-toggle {
+    display: flex;
+  }
+
+  .nav-menu {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    position: absolute;
+    top: 70px;
+    left: -100%;
+    opacity: 1;
+    transition: all 0.5s ease;
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding: 1rem 0;
+    max-height: calc(100vh - 70px);
+    overflow-y: auto;
+  }
+
+  .nav-menu.active {
+    left: 0;
+  }
+
+  .nav-item {
+    margin: 0.35rem 0;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .nav-links {
+    display: block;
+    width: auto;
+    padding: 0.5rem 1rem;
+  }
+
+  .user-greeting {
+    width: auto;
+    margin: 0.5rem auto;
+  }
+}

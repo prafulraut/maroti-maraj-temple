@@ -1,0 +1,74 @@
+.donate-page {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2rem 1rem 3rem;
+  color: #334155;
+}
+
+.hero {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+.hero-icon { font-size: 2.5rem; }
+.hero h1 { margin: 0.5rem 0; color: #7c2d12; font-size: clamp(1.7rem, 6vw, 2.1rem); line-height: 1.35; }
+.hero p { color: #64748b; margin: 0; }
+
+.card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1.75rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
+}
+
+.pay-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+@media (max-width: 760px) {
+  .pay-layout { grid-template-columns: 1fr; gap: 1rem; }
+}
+
+.btn {
+  display: inline-block;
+  padding: 0.75rem 1.4rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  text-align: center;
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+.btn-primary { background: #f97316; color: #fff; }
+.btn-primary:hover { background: #ea580c; }
+.btn-outline { background: #fff; border: 1px solid #cbd5e1; color: #475569; }
+.btn-outline:hover { background: #f8fafc; }
+.btn-block { display: block; width: 100%; box-sizing: border-box; margin: 0.5rem 0; }
+
+.pay-card h3 { margin-top: 0; color: #0f172a; }
+.qr-card { text-align: center; }
+.pay-block { padding: 1rem 0; border-bottom: 1px dashed #e2e8f0; }
+.pay-block:last-of-type { border-bottom: none; padding-bottom: 0; }
+.pay-block h4 { margin: 0 0 0.5rem; }
+.pay-block pre { white-space: pre-wrap; font-family: inherit; margin: 0; background: #f8fafc; padding: 0.75rem; border-radius: 8px; }
+.qr-img {
+  display: block;
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto 0.5rem;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+}
+.upi-id { font-size: 1.1rem; font-weight: 700; color: #9a3412; margin: 0; word-break: break-all; }
+
+.muted { color: #64748b; font-size: 0.88rem; }
+
+@media (max-width: 600px) {
+  .donate-page { padding: 1.5rem 0.9rem 2.5rem; }
+  .hero { margin-bottom: 1.25rem; }
+  .card { padding: 1.25rem; }
+}

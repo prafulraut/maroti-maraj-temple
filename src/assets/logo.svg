@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="Shri Sant Maroti Maharaj Sevashram">
+  <defs>
+    <linearGradient id="ring" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fde68a"/>
+      <stop offset="0.5" stop-color="#f59e0b"/>
+      <stop offset="1" stop-color="#b45309"/>
+    </linearGradient>
+    <radialGradient id="core" cx="0.5" cy="0.4" r="0.65">
+      <stop offset="0" stop-color="#9a3412"/>
+      <stop offset="1" stop-color="#431407"/>
+    </radialGradient>
+    <linearGradient id="temple" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fffbeb"/>
+      <stop offset="1" stop-color="#fcd34d"/>
+    </linearGradient>
+    <radialGradient id="flame" cx="0.5" cy="0.7" r="0.6">
+      <stop offset="0" stop-color="#fff7ed"/>
+      <stop offset="0.5" stop-color="#fbbf24"/>
+      <stop offset="1" stop-color="#ea580c"/>
+    </radialGradient>
+  </defs>
+
+  <!-- outer gold ring with petal dots -->
+  <circle cx="100" cy="100" r="96" fill="url(#ring)"/>
+  <g fill="#fff7ed" opacity="0.85">
+    <circle cx="100" cy="10" r="3"/><circle cx="100" cy="190" r="3"/>
+    <circle cx="10" cy="100" r="3"/><circle cx="190" cy="100" r="3"/>
+    <circle cx="36.4" cy="36.4" r="3"/><circle cx="163.6" cy="36.4" r="3"/>
+    <circle cx="36.4" cy="163.6" r="3"/><circle cx="163.6" cy="163.6" r="3"/>
+  </g>
+  <circle cx="100" cy="100" r="84" fill="url(#core)"/>
+  <circle cx="100" cy="100" r="78" fill="none" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="2 5" opacity="0.7"/>
+
+  <!-- saffron flag (bhagwa dhwaj) -->
+  <line x1="100" y1="30" x2="100" y2="52" stroke="#fde68a" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M101 30 L128 37 L113 41 L126 46 L101 47 Z" fill="#f97316" stroke="#fed7aa" stroke-width="1"/>
+
+  <!-- temple shikhar -->
+  <path fill="url(#temple)" d="
+    M100 50
+    C 92 62, 82 76, 78 94
+    L 72 94 L 72 102
+    L 62 102 L 62 140
+    L 138 140 L 138 102
+    L 128 102 L 128 94 L 122 94
+    C 118 76, 108 62, 100 50 Z"/>
+  <circle cx="100" cy="50" r="4" fill="#fbbf24"/>
+  <!-- tiers -->
+  <path d="M84 80 H116 M80 90 H120" stroke="#b45309" stroke-width="2" opacity="0.55"/>
+  <!-- doorway -->
+  <path d="M90 140 V118 a10 10 0 0 1 20 0 V140 Z" fill="#7c2d12"/>
+  <!-- steps -->
+  <rect x="54" y="140" width="92" height="6" rx="2" fill="#fcd34d"/>
+  <rect x="46" y="146" width="108" height="6" rx="2" fill="#f59e0b"/>
+
+  <!-- diya -->
+  <path d="M84 162 Q100 176 116 162 Z" fill="#fbbf24"/>
+  <path d="M100 148 C 95 155, 96 160, 100 161 C 104 160, 105 155, 100 148 Z" fill="url(#flame)"/>
+</svg>

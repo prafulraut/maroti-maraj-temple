@@ -1,0 +1,256 @@
+<div class="pm-container">
+
+  <!-- ═══ SECTION 1: Palkhi Settings & Image Upload ═══ -->
+  <div class="pm-card">
+    <div class="pm-card-header">
+      <span class="pm-icon">🛕</span>
+      <h2>Palkhi Settings & Image</h2>
+    </div>
+
+    <div class="pm-settings-grid">
+      <!-- Image Upload -->
+      <div class="image-upload-box">
+        <div class="preview-area" [class.has-image]="imagePreview">
+          <img *ngIf="imagePreview" [src]="imagePreview" alt="Palkhi Image" class="preview-img">
+          <div *ngIf="!imagePreview" class="upload-placeholder">
+            <span>🪔</span>
+            <p>No image uploaded yet</p>
+          </div>
+        </div>
+        <label class="upload-btn" for="palkhiImageInput">
+          📷 Choose Palkhi Image
+        </label>
+        <input type="file" id="palkhiImageInput" accept="image/*,.heic,.heif,.jfif,.avif,.bmp,.tif,.tiff" (change)="onFileSelected($event)" style="display:none">
+        <p class="upload-hint">Any photo format (JPG, PNG, HEIC, WebP…) — large photos are auto-resized</p>
+      </div>
+
+      <!-- Settings Form -->
+      <form [formGroup]="settingsForm" (ngSubmit)="saveSettings()" class="settings-form">
+        <div class="form-group">
+          <label>Palkhi Title</label>
+          <input type="text" formControlName="palkhiTitle" placeholder="e.g. Maroti Maharaj Palkhi 2024">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Start Date (Day 1)</label>
+            <input type="date" formControlName="palkhiDate">
+          </div>
+          <div class="form-group">
+            <label>Total Days</label>
+            <input type="number" formControlName="totalDays" min="1" max="60" placeholder="e.g. 8">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Start Location</label>
+            <input type="text" formControlName="startLocation" placeholder="e.g. Mandir, Pune">
+          </div>
+          <div class="form-group">
+            <label>End Location</label>
+            <input type="text" formControlName="endLocation" placeholder="e.g. Pandharpur">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea formControlName="description" rows="3" placeholder="Brief description of the Palkhi..."></textarea>
+        </div>
+        <button type="submit" class="btn-primary" [disabled]="isLoading">
+          {{ isLoading ? 'Saving...' : '💾 Save Settings' }}
+        </button>
+        <p class="form-msg" *ngIf="settingsMsg">{{ settingsMsg }}</p>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══ SECTION 2: Register Family / Stop ═══ -->
+  <div class="pm-card">
+    <div class="pm-card-header">
+      <span class="pm-icon">📝</span>
+      <h2>Register Family / Stop</h2>
+    </div>
+
+    <form [formGroup]="scheduleForm" (ngSubmit)="addSchedule()" class="schedule-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Day *</label>
+          <select formControlName="dayNumber">
+            <option *ngFor="let d of days" [ngValue]="d">
+              Day {{ d }}<ng-container *ngIf="dayDate(d)"> — {{ dayDate(d) | date:'dd MMM' }}</ng-container>
+              ({{ visitCount(d) }} visits)
+            </option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Visit Type *</label>
+          <div class="type-toggle">
+            <label class="type-opt" [class.on]="scheduleForm.value.visitType === 'visit'">
+              <input type="radio" formControlName="visitType" value="visit"> 🏠 Home Visit
+            </label>
+            <label class="type-opt lunch" [class.on]="scheduleForm.value.visitType === 'lunch'">
+              <input type="radio" formControlName="visitType" value="lunch"> 🍛 Lunch
+            </label>
+            <label class="type-opt dinner" [class.on]="scheduleForm.value.visitType === 'dinner'">
+              <input type="radio" formControlName="visitType" value="dinner"> 🍽️ Dinner
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Family / Stop Name *</label>
+          <input type="text" formControlName="familyName" placeholder="e.g. Patil Family">
+        </div>
+        <div class="form-group">
+          <label>Mobile Number *</label>
+          <input type="text" formControlName="mobileNumber" placeholder="10-digit mobile no." maxlength="10">
+          <span class="error" *ngIf="scheduleForm.get('mobileNumber')?.invalid && scheduleForm.get('mobileNumber')?.touched">
+            Enter valid 10-digit mobile number
+          </span>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>City *</label>
+          <input type="text" formControlName="city" placeholder="e.g. Pune">
+        </div>
+        <div class="form-group">
+          <label>Address / Landmark</label>
+          <input type="text" formControlName="address" placeholder="e.g. Near Ganesh Temple">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Expected Arrival Time *</label>
+          <input type="text" formControlName="arrivalTime" placeholder="e.g. 10:30 AM">
+        </div>
+        <div class="form-group">
+          <label>Time Taken (from prev stop) *</label>
+          <input type="text" formControlName="timeTaken" placeholder="e.g. 45 minutes">
+        </div>
+        <div class="form-group">
+          <label>Order in Day (0 = add at end)</label>
+          <input type="number" formControlName="orderIndex" min="0">
+        </div>
+      </div>
+      <button type="submit" class="btn-add" [disabled]="scheduleForm.invalid">
+        ➕ Add Stop
+      </button>
+      <p class="form-msg" *ngIf="scheduleMsg">{{ scheduleMsg }}</p>
+    </form>
+  </div>
+
+  <!-- ═══ SECTION 3: Schedule Table & SMS ═══ -->
+  <div class="pm-card">
+    <div class="pm-card-header">
+      <span class="pm-icon">📋</span>
+      <h2>Day-wise Palkhi Schedule</h2>
+      <button class="btn-notify-all" (click)="notifyAll()" *ngIf="schedules.length > 0">
+        📱 Send SMS to ALL
+      </button>
+    </div>
+    <p class="notify-msg" *ngIf="notifyMsg">{{ notifyMsg }}</p>
+
+    <!-- Day tabs with visit count vs 15–20 target -->
+    <div class="day-tabs">
+      <button type="button" *ngFor="let d of days" class="day-tab"
+              [class.active]="selectedDay === d" (click)="selectDay(d)">
+        <span class="day-tab-title">Day {{ d }}</span>
+        <span class="day-tab-date" *ngIf="dayDate(d)">{{ dayDate(d) | date:'dd MMM' }}</span>
+        <span class="day-tab-count" [ngClass]="'target-' + visitTarget(d)">
+          {{ visitCount(d) }}/{{ MIN_VISITS_PER_DAY }}–{{ MAX_VISITS_PER_DAY }}
+        </span>
+        <span class="day-tab-meals">
+          <span [class.missing]="!mealHost(d, 'lunch')" title="Lunch">🍛</span>
+          <span [class.missing]="!mealHost(d, 'dinner')" title="Dinner">🍽️</span>
+        </span>
+      </button>
+    </div>
+
+    <!-- Selected day summary -->
+    <div class="day-summary">
+      <div class="summary-item">
+        <small>Home visits</small>
+        <strong [ngClass]="'target-text-' + visitTarget(selectedDay)">
+          {{ visitCount(selectedDay) }}
+          <ng-container [ngSwitch]="visitTarget(selectedDay)">
+            <span *ngSwitchCase="'low'">(need {{ MIN_VISITS_PER_DAY - visitCount(selectedDay) }} more)</span>
+            <span *ngSwitchCase="'high'">(over {{ MAX_VISITS_PER_DAY }})</span>
+            <span *ngSwitchDefault>✓</span>
+          </ng-container>
+        </strong>
+      </div>
+      <div class="summary-item meal lunch">
+        <small>🍛 Lunch at</small>
+        <strong>{{ mealHost(selectedDay, 'lunch')?.familyName || 'Not assigned' }}</strong>
+      </div>
+      <div class="summary-item meal dinner">
+        <small>🍽️ Dinner at</small>
+        <strong>{{ mealHost(selectedDay, 'dinner')?.familyName || 'Not assigned' }}</strong>
+      </div>
+      <button class="btn-sms-day" *ngIf="stopsForDay(selectedDay).length > 0" (click)="notifyDay(selectedDay)">
+        📱 SMS Day {{ selectedDay }}
+      </button>
+    </div>
+
+    <div *ngIf="stopsForDay(selectedDay).length === 0" class="empty-state">
+      No stops for Day {{ selectedDay }} yet. Add one above!
+    </div>
+
+    <div class="table-wrap" *ngIf="stopsForDay(selectedDay).length > 0">
+      <table class="pm-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Type</th>
+            <th>Family / Stop</th>
+            <th>Mobile</th>
+            <th>City</th>
+            <th>Arrival Time</th>
+            <th>Duration</th>
+            <th>Status</th>
+            <th>SMS</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let s of stopsForDay(selectedDay); let i = index"
+              [class.row-lunch]="s.visitType === 'lunch'"
+              [class.row-dinner]="s.visitType === 'dinner'">
+            <td>{{ s.orderIndex || i+1 }}</td>
+            <td>
+              <span class="type-badge" [ngClass]="'type-' + (s.visitType || 'visit')">
+                {{ s.visitType === 'lunch' ? '🍛 Lunch' : s.visitType === 'dinner' ? '🍽️ Dinner' : '🏠 Visit' }}
+              </span>
+            </td>
+            <td>
+              <strong>{{ s.familyName }}</strong>
+              <div class="sub-text" *ngIf="s.address">{{ s.address }}</div>
+            </td>
+            <td>{{ s.mobileNumber }}</td>
+            <td>{{ s.city }}</td>
+            <td><strong>{{ s.arrivalTime }}</strong></td>
+            <td>{{ s.timeTaken }}</td>
+            <td>
+              <select class="status-select" [value]="s.status" (change)="updateStatus(s._id, $any($event.target).value)">
+                <option value="pending">Pending</option>
+                <option value="in-transit">In Transit</option>
+                <option value="arrived">Arrived</option>
+                <option value="completed">Completed</option>
+              </select>
+            </td>
+            <td>
+              <span class="sms-badge" [class.sent]="s.smsSent">
+                {{ s.smsSent ? '✅ Sent' : '⏳ Not Sent' }}
+              </span>
+            </td>
+            <td class="action-cell">
+              <button class="btn-sms" (click)="notifyOne(s._id)" title="Send SMS">📱</button>
+              <button class="btn-delete" (click)="deleteSchedule(s._id)" title="Delete">🗑️</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>

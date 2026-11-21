@@ -1,0 +1,231 @@
+<div class="admin-container">
+  <div class="header">
+    <h1>{{ 'ADMIN.TITLE' | translate }}</h1>
+    <p>{{ 'ADMIN.SUBTITLE' | translate }}</p>
+  </div>
+
+  <!-- Top Statistics Row -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon devotees-icon">🙏</div>
+      <div class="stat-info">
+        <h3>{{ 'ADMIN.STAT_DEVOTEES' | translate }}</h3>
+        <p class="stat-value">{{ stats.totalUsers | number }}</p>
+      </div>
+    </div>
+
+    <div class="stat-card clickable" (click)="activeTab = 'donations'">
+      <div class="stat-icon donations-icon">₹</div>
+      <div class="stat-info">
+        <h3>{{ 'ADMIN.STAT_DONATIONS' | translate }}</h3>
+        <p class="stat-value">₹{{ stats.todaysDonations | number }}</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon events-icon">📅</div>
+      <div class="stat-info">
+        <h3>{{ 'ADMIN.STAT_EVENTS' | translate }}</h3>
+        <p class="stat-value">{{ stats.upcomingEvents }}</p>
+      </div>
+    </div>
+
+    <div class="stat-card clickable" (click)="activeTab = 'gallery'">
+      <div class="stat-icon bookings-icon">🖼️</div>
+      <div class="stat-info">
+        <h3>{{ 'ADMIN.STAT_GALLERY' | translate }}</h3>
+        <p class="stat-value">{{ stats.galleryImages }}</p>
+      </div>
+    </div>
+  </div>
+
+  <p class="flash" *ngIf="msg" [class.err]="msgType === 'err'">{{ msg }}</p>
+
+  <!-- Tabs -->
+  <div class="tabs" role="tablist">
+    <button role="tab" [class.active]="activeTab === 'overview'" (click)="activeTab = 'overview'">📋 {{ 'ADMIN.TAB_OVERVIEW' | translate }}</button>
+    <button role="tab" [class.active]="activeTab === 'donations'" (click)="activeTab = 'donations'">₹ {{ 'ADMIN.TAB_DONATIONS' | translate }}</button>
+    <button role="tab" [class.active]="activeTab === 'gallery'" (click)="activeTab = 'gallery'">🖼️ {{ 'ADMIN.TAB_GALLERY' | translate }}</button>
+    <button role="tab" [class.active]="activeTab === 'palkhi'" (click)="activeTab = 'palkhi'">🪔 {{ 'ADMIN.TAB_PALKHI' | translate }}</button>
+  </div>
+
+  <!-- ═══ TAB: Users & Events ═══ -->
+  <div class="main-layout-grid" *ngIf="activeTab === 'overview'">
+
+    <div class="tables-column">
+      <!-- Users -->
+      <div class="admin-card">
+        <div class="card-header">
+          <h2>{{ 'ADMIN.USERS.TITLE' | translate }} <span class="muted">({{ users.length }})</span></h2>
+          <input class="search" type="search" [placeholder]="'ADMIN.USERS.SEARCH_PLACEHOLDER' | translate"
+                 [value]="userSearch" (input)="userSearch = $any($event.target).value">
+        </div>
+
+        <div class="table-responsive">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>{{ 'ADMIN.USERS.NAME' | translate }}</th>
+                <th>{{ 'ADMIN.USERS.EMAIL' | translate }}</th>
+                <th>{{ 'ADMIN.USERS.ROLE' | translate }}</th>
+                <th>{{ 'ADMIN.USERS.STATUS' | translate }}</th>
+                <th>{{ 'ADMIN.USERS.JOINED' | translate }}</th>
+                <th>{{ 'ADMIN.USERS.ACTIONS' | translate }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let u of filteredUsers" [class.inactive]="!u.isActive">
+                <td>{{ u.name }} <span class="you" *ngIf="isSelf(u)">{{ 'ADMIN.USERS.YOU' | translate }}</span></td>
+                <td>{{ u.email }}</td>
+                <td><span class="badge" [class.badge-admin]="u.role === 'admin'">{{ u.role }}</span></td>
+                <td>
+                  <span class="badge" [class.badge-success]="u.isActive" [class.badge-off]="!u.isActive">
+                    {{ u.isActive ? ('ADMIN.USERS.ACTIVE' | translate) : ('ADMIN.USERS.INACTIVE' | translate) }}
+                  </span>
+                </td>
+                <td class="nowrap">{{ u.createdAt | date:'mediumDate' }}</td>
+                <td class="actions-cell">
+                  <ng-container *ngIf="!isSelf(u)">
+                    <button class="action-btn edit-btn" (click)="toggleRole(u)">
+                      {{ u.role === 'admin' ? ('ADMIN.USERS.MAKE_USER' | translate) : ('ADMIN.USERS.MAKE_ADMIN' | translate) }}
+                    </button>
+                    <button class="action-btn edit-btn" (click)="toggleStatus(u)">
+                      {{ u.isActive ? ('ADMIN.USERS.DEACTIVATE' | translate) : ('ADMIN.USERS.ACTIVATE' | translate) }}
+                    </button>
+                    <button class="action-btn delete-btn" (click)="deleteUser(u)">{{ 'ADMIN.USERS.DELETE' | translate }}</button>
+                  </ng-container>
+                  <span class="muted" *ngIf="isSelf(u)">—</span>
+                </td>
+              </tr>
+              <tr *ngIf="filteredUsers.length === 0">
+                <td colspan="6" class="empty-row">{{ 'ADMIN.USERS.EMPTY' | translate }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Events -->
+      <div class="admin-card">
+        <div class="card-header">
+          <h2>{{ 'ADMIN.EVENTS.TITLE' | translate }} <span class="muted">({{ events.length }})</span></h2>
+          <button class="btn btn-sm btn-primary" (click)="openNewEvent()" *ngIf="!showEventForm">{{ 'ADMIN.EVENTS.CREATE' | translate }}</button>
+        </div>
+
+        <form class="event-form" *ngIf="showEventForm" [formGroup]="eventForm" (ngSubmit)="saveEvent()">
+          <h3>{{ editingEventId ? ('ADMIN.EVENTS.EDIT_TITLE' | translate) : ('ADMIN.EVENTS.NEW_TITLE' | translate) }}</h3>
+          <div class="ev-row">
+            <label>{{ 'ADMIN.EVENTS.FIELD_TITLE' | translate }}
+              <input type="text" formControlName="title" [placeholder]="'ADMIN.EVENTS.PLACEHOLDER_TITLE' | translate">
+            </label>
+            <label>{{ 'ADMIN.EVENTS.FIELD_DATE' | translate }}
+              <input type="date" formControlName="date">
+            </label>
+            <label>{{ 'ADMIN.EVENTS.FIELD_TIME' | translate }}
+              <input type="text" formControlName="time" [placeholder]="'ADMIN.EVENTS.PLACEHOLDER_TIME' | translate">
+            </label>
+          </div>
+          <label>{{ 'ADMIN.EVENTS.FIELD_LOCATION' | translate }}
+            <input type="text" formControlName="location">
+          </label>
+          <label>{{ 'ADMIN.EVENTS.FIELD_DESCRIPTION' | translate }}
+            <textarea formControlName="description" rows="3" [placeholder]="'ADMIN.EVENTS.PLACEHOLDER_DESC' | translate"></textarea>
+          </label>
+          <p class="form-err" *ngIf="eventForm.invalid && eventForm.touched">{{ 'ADMIN.EVENTS.VALIDATION_ERROR' | translate }}</p>
+          <div class="ev-actions">
+            <button type="submit" class="btn btn-sm btn-primary">{{ editingEventId ? ('ADMIN.EVENTS.SAVE_CHANGES' | translate) : ('ADMIN.EVENTS.CREATE_EVENT' | translate) }}</button>
+            <button type="button" class="btn btn-sm btn-ghost" (click)="cancelEvent()">{{ 'ADMIN.EVENTS.CANCEL' | translate }}</button>
+          </div>
+        </form>
+
+        <div class="table-responsive">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>{{ 'ADMIN.EVENTS.COL_TITLE' | translate }}</th>
+                <th>{{ 'ADMIN.EVENTS.COL_DATE' | translate }}</th>
+                <th>{{ 'ADMIN.EVENTS.COL_STATUS' | translate }}</th>
+                <th>{{ 'ADMIN.EVENTS.COL_ACTIONS' | translate }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let e of events">
+                <td>{{ e.title }}<div class="sub" *ngIf="e.time || e.location">{{ e.time }} {{ e.time && e.location ? '·' : '' }} {{ e.location }}</div></td>
+                <td>{{ e.date | date:'mediumDate' }}</td>
+                <td>
+                  <span class="badge" [class.badge-success]="isUpcoming(e)">
+                    {{ isUpcoming(e) ? ('ADMIN.EVENTS.UPCOMING' | translate) : ('ADMIN.EVENTS.COMPLETED' | translate) }}
+                  </span>
+                </td>
+                <td class="nowrap">
+                  <button class="action-btn edit-btn" (click)="editEvent(e)">{{ 'ADMIN.EVENTS.EDIT' | translate }}</button>
+                  <button class="action-btn delete-btn" (click)="deleteEvent(e)">{{ 'ADMIN.EVENTS.DELETE' | translate }}</button>
+                </td>
+              </tr>
+              <tr *ngIf="events.length === 0">
+                <td colspan="4" class="empty-row">{{ 'ADMIN.EVENTS.EMPTY' | translate }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar-column">
+      <div class="admin-card festival-card">
+        <div class="card-header border-none">
+          <h2>{{ 'ADMIN.FESTIVALS.TITLE' | translate }}</h2>
+        </div>
+        <div class="festival-list">
+          <div class="festival-item" *ngFor="let fest of festivals" [class.highlighted]="fest.highlight">
+            <div class="fest-icon">🪔</div>
+            <div class="fest-details">
+              <h4>{{ fest.name }}</h4>
+              <p>{{ fest.date }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-card quick-card">
+        <h2>{{ 'ADMIN.QUICK_LINKS.TITLE' | translate }}</h2>
+        <button class="quick" (click)="activeTab = 'donations'">₹ {{ 'ADMIN.QUICK_LINKS.DONATIONS' | translate }}</button>
+        <button class="quick" (click)="activeTab = 'gallery'">📤 {{ 'ADMIN.QUICK_LINKS.UPLOAD_GALLERY' | translate }}</button>
+        <a class="quick" routerLink="/gallery">🖼️ {{ 'ADMIN.QUICK_LINKS.VIEW_GALLERY' | translate }}</a>
+        <button class="quick" (click)="activeTab = 'palkhi'">🪔 {{ 'ADMIN.QUICK_LINKS.MANAGE_PALKHI' | translate }}</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ TAB: Donations ═══ -->
+  <ng-container *ngIf="activeTab === 'donations'">
+    <div class="section-header donations-header">
+      <span>🙏</span>
+      <h2>{{ 'ADMIN.DONATIONS_SECTION.TITLE' | translate }}</h2>
+      <p>{{ 'ADMIN.DONATIONS_SECTION.DESC' | translate }}</p>
+    </div>
+    <app-donation-management (changed)="loadStats()"></app-donation-management>
+  </ng-container>
+
+  <!-- ═══ TAB: Gallery ═══ -->
+  <ng-container *ngIf="activeTab === 'gallery'">
+    <div class="section-header gallery-header">
+      <span>🖼️</span>
+      <h2>{{ 'ADMIN.GALLERY_SECTION.TITLE' | translate }}</h2>
+      <p>{{ 'ADMIN.GALLERY_SECTION.DESC' | translate }}</p>
+    </div>
+    <app-gallery-management></app-gallery-management>
+  </ng-container>
+
+  <!-- ═══ TAB: Palkhi ═══ -->
+  <ng-container *ngIf="activeTab === 'palkhi'">
+    <div class="section-header palkhi-section-header">
+      <span>🪔</span>
+      <h2>{{ 'ADMIN.PALKHI_SECTION.TITLE' | translate }}</h2>
+      <p>{{ 'ADMIN.PALKHI_SECTION.DESC' | translate }}</p>
+    </div>
+    <app-palkhi-management></app-palkhi-management>
+  </ng-container>
+
+</div>

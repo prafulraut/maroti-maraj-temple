@@ -1,0 +1,148 @@
+<div class="gallery-page">
+
+  <section class="gallery-hero">
+    <h1>{{ 'GALLERY_PAGE.TITLE' | translate }}</h1>
+    <p>{{ 'GALLERY_PAGE.SUBTITLE' | translate }}</p>
+    <!-- Only admins can upload -->
+    <button type="button" class="share-btn" *ngIf="isAdmin" (click)="toggleShare()">
+      {{ showShare ? ('SHARE.CLOSE' | translate) : '📤 ' + ('SHARE.BUTTON' | translate) }}
+    </button>
+  </section>
+
+  <div class="gallery-container">
+
+    <!-- ─── Share your photos & videos ─────────────────────────────────── -->
+    <section class="share-card" *ngIf="showShare && isAdmin">
+
+      <!-- Thank-you -->
+      <div class="share-done" *ngIf="shareDone">
+        <span class="share-done-icon">🙏</span>
+        <h2>{{ 'SHARE.THANKS_TITLE' | translate }}</h2>
+        <p>{{ (publishedNow ? 'SHARE.THANKS_PUBLISHED' : 'SHARE.THANKS_PENDING') | translate }}</p>
+        <div class="share-actions">
+          <button type="button" class="btn-outline" (click)="resetShare()">{{ 'SHARE.MORE' | translate }}</button>
+          <button type="button" class="btn-primary" (click)="toggleShare()">{{ 'SHARE.CLOSE' | translate }}</button>
+        </div>
+      </div>
+
+      <!-- Form -->
+      <form *ngIf="!shareDone" [formGroup]="shareForm" (ngSubmit)="submitShare()">
+        <h2>📤 {{ 'SHARE.TITLE' | translate }}</h2>
+        <p class="share-intro">{{ 'SHARE.INTRO' | translate }}</p>
+
+        <label class="dropzone" for="shareInput">
+          <span class="dz-icon">🖼️ 🎬</span>
+          <strong>{{ 'SHARE.CHOOSE' | translate }}</strong>
+          <small>{{ 'SHARE.LIMITS' | translate }}</small>
+        </label>
+        <input type="file" id="shareInput" [accept]="accept" multiple hidden (change)="onFiles($event)">
+
+        <ul class="skipped" *ngIf="skipped.length">
+          <li *ngFor="let s of skipped">⚠️ {{ s.name }} — {{ s.reason | translate }}</li>
+        </ul>
+
+        <div class="selected-grid" *ngIf="selected.length">
+          <div class="selected-item" *ngFor="let s of selected; let i = index">
+            <video *ngIf="s.isVideo" [src]="s.preview" muted preload="metadata"></video>
+            <img *ngIf="!s.isVideo" [src]="s.preview" [alt]="s.file.name">
+            <span class="kind" *ngIf="s.isVideo">🎬</span>
+            <button type="button" class="remove" (click)="removeSelected(i)"
+                    [disabled]="uploadProgress !== null" [attr.aria-label]="'SHARE.REMOVE' | translate">✕</button>
+          </div>
+        </div>
+
+        <div class="share-fields">
+          <label>
+            {{ 'SHARE.NAME' | translate }}
+            <input type="text" formControlName="uploaderName" maxlength="60" [placeholder]="'SHARE.NAME_PLACEHOLDER' | translate">
+          </label>
+          <label>
+            {{ 'SHARE.CATEGORY' | translate }}
+            <select formControlName="category">
+              <option *ngFor="let c of categories" [value]="c">{{ 'GALLERY_PAGE.CAT.' + c.toUpperCase() | translate }}</option>
+            </select>
+          </label>
+          <label class="wide">
+            {{ 'SHARE.CAPTION' | translate }}
+            <input type="text" formControlName="title" maxlength="120" [placeholder]="'SHARE.CAPTION_PLACEHOLDER' | translate">
+          </label>
+          <label class="wide">
+            {{ 'SHARE.DESCRIPTION' | translate }}
+            <textarea formControlName="description" rows="2" maxlength="500"></textarea>
+          </label>
+        </div>
+
+        <div class="progress" *ngIf="uploadProgress !== null">
+          <div class="bar" [style.width.%]="uploadProgress"></div>
+          <span>{{ uploadProgress }}%</span>
+        </div>
+
+        <p class="share-error" *ngIf="shareError">{{ shareError | translate }}</p>
+
+        <button type="submit" class="btn-primary btn-block" [disabled]="!selected.length || uploadProgress !== null">
+          {{ uploadProgress !== null ? ('SHARE.UPLOADING' | translate) : ('SHARE.SUBMIT' | translate) + (selected.length ? ' (' + selected.length + ')' : '') }}
+        </button>
+      </form>
+    </section>
+
+    <!-- Category filter -->
+    <div class="filter-bar">
+      <button class="chip" [class.active]="activeCategory === ''" (click)="selectCategory('')">
+        {{ 'GALLERY_PAGE.ALL' | translate }}
+      </button>
+      <button class="chip" *ngFor="let c of categories"
+              [class.active]="activeCategory === c" (click)="selectCategory(c)">
+        {{ 'GALLERY_PAGE.CAT.' + c.toUpperCase() | translate }}
+      </button>
+    </div>
+
+    <!-- States -->
+    <div class="state" *ngIf="isLoading">
+      <div class="spinner"></div>
+    </div>
+    <div class="state error" *ngIf="!isLoading && error">{{ error | translate }}</div>
+    <div class="state empty" *ngIf="!isLoading && !error && images.length === 0">
+      <span>🖼️</span>
+      <p>{{ 'GALLERY_PAGE.EMPTY' | translate }}</p>
+    </div>
+
+    <!-- Grid -->
+    <div class="masonry" *ngIf="!isLoading && images.length > 0">
+      <figure class="tile" *ngFor="let img of images; let i = index" (click)="open(i)" tabindex="0"
+              (keydown.enter)="open(i)">
+        <ng-container *ngIf="gallery.isVideo(img); else photoTile">
+          <video [src]="gallery.imageSrc(img) + '#t=0.1'" muted playsinline preload="metadata"></video>
+          <span class="play-badge">▶</span>
+        </ng-container>
+        <ng-template #photoTile>
+          <img [src]="gallery.imageSrc(img)" [alt]="img.title || img.category" loading="lazy">
+        </ng-template>
+        <figcaption>
+          <span class="tag">{{ 'GALLERY_PAGE.CAT.' + img.category.toUpperCase() | translate }}</span>
+          <strong *ngIf="img.title">{{ img.title }}</strong>
+        </figcaption>
+      </figure>
+    </div>
+  </div>
+
+  <!-- Lightbox -->
+  <div class="lightbox" *ngIf="current as img" (click)="close()" role="dialog" aria-modal="true">
+    <button class="lb-btn lb-close" (click)="close()" aria-label="Close">✕</button>
+    <button class="lb-btn lb-prev" *ngIf="images.length > 1" (click)="prev($event)" aria-label="Previous">‹</button>
+
+    <div class="lb-content" (click)="$event.stopPropagation()">
+      <video *ngIf="gallery.isVideo(img)" [src]="gallery.imageSrc(img)" controls autoplay playsinline></video>
+      <img *ngIf="!gallery.isVideo(img)" [src]="gallery.imageSrc(img)" [alt]="img.title || img.category">
+      <div class="lb-caption">
+        <strong *ngIf="img.title">{{ img.title }}</strong>
+        <p *ngIf="img.description">{{ img.description }}</p>
+        <small>
+          {{ (lightboxIndex ?? 0) + 1 }} / {{ images.length }} · {{ img.createdAt | date:'mediumDate' }}
+          <ng-container *ngIf="img.uploaderName"> · {{ 'SHARE.SHARED_BY' | translate }} {{ img.uploaderName }}</ng-container>
+        </small>
+      </div>
+    </div>
+
+    <button class="lb-btn lb-next" *ngIf="images.length > 1" (click)="next($event)" aria-label="Next">›</button>
+  </div>
+</div>
