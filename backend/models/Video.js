@@ -12,6 +12,8 @@ const videoSchema = new mongoose.Schema({
   // Secret that lets the uploader send chunks without being logged in
   uploadToken:  { type: String, required: true, select: false },
   complete:     { type: Boolean, default: false },
+  // Set once utils/mp4AudioFix.js has checked (and if needed repaired) the audio track
+  audioChecked: { type: Boolean, default: false },
   // Gallery details collected when the upload starts
   meta: {
     title:        { type: String, default: '' },

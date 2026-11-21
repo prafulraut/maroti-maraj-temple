@@ -83,7 +83,9 @@ export class GalleryService {
 
   /** Full URL for a media path returned by the API (e.g. /api/images/123) */
   imageSrc(img: GalleryImage): string {
-    return img.imageUrl.startsWith('http') ? img.imageUrl : SERVER_BASE + img.imageUrl;
+    const url = img.imageUrl.startsWith('http') ? img.imageUrl : SERVER_BASE + img.imageUrl;
+    // ?v= changes the URL so browsers drop copies cached before the server-side audio repair
+    return this.isVideo(img) && img.imageUrl.startsWith('/api/videos/') ? url + '?v=2' : url;
   }
 
   isVideo(img: GalleryImage): boolean {

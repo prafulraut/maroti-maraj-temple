@@ -2,6 +2,7 @@ const crypto = require('crypto');
 const mongoose = require('mongoose');
 const Video = require('../models/Video');
 const VideoChunk = require('../models/VideoChunk');
+const { planAacConfigFrameFix } = require('./mp4AudioFix');
 
 // Netlify Functions accept/return at most ~6 MB per request (≈4.5 MB of binary
 // after base64 encoding), so videos move in 3 MB pieces both ways.
@@ -70,6 +71,53 @@ async function saveChunk(video, n, data) {
   );
 }
 
+/** Read bytes [start, start+length) of a stored video. */
+async function readVideoBytes(video, start, length) {
+  const end = Math.min(video.size, start + length) - 1;
+  if (end < start) return Buffer.alloc(0);
+  const first = Math.floor(start / video.chunkSize);
+  const last = Math.floor(end / video.chunkSize);
+  const chunks = await VideoChunk.find({ video: video._id, n: { $gte: first, $lte: last } }).sort({ n: 1 });
+  if (chunks.length !== last - first + 1) throw new Error('Video data is incomplete.');
+  const joined = Buffer.concat(chunks.map((c) => c.data));
+  const offset = start - first * video.chunkSize;
+  return joined.subarray(offset, offset + (end - start + 1));
+}
+
+/** Overwrite bytes of a stored video in place (never changes its size). */
+async function writeVideoBytes(video, start, data) {
+  const first = Math.floor(start / video.chunkSize);
+  const last = Math.floor((start + data.length - 1) / video.chunkSize);
+  for (let n = first; n <= last; n++) {
+    const chunk = await VideoChunk.findOne({ video: video._id, n });
+    if (!chunk) throw new Error('Video data is incomplete.');
+    const buf = Buffer.from(chunk.data);
+    const chunkStart = n * video.chunkSize;
+    const from = Math.max(start, chunkStart);
+    const to = Math.min(start + data.length, chunkStart + buf.length);
+    data.copy(buf, from - chunkStart, from - start, to - start);
+    await VideoChunk.updateOne({ _id: chunk._id }, { $set: { data: buf } });
+  }
+}
+
+/**
+ * Fix videos whose first AAC audio frame is actually the codec config (written by
+ * some phone recorders). Chrome/Edge on Windows refuse to play those. Runs once per
+ * video; failures are logged and never block upload or playback.
+ */
+async function repairVideoAudio(video) {
+  if (video.audioChecked) return;
+  try {
+    const patches = await planAacConfigFrameFix((o, l) => readVideoBytes(video, o, l), video.size);
+    for (const p of patches) await writeVideoBytes(video, p.offset, p.data);
+    if (patches.length) console.log(`Repaired audio track of video ${video._id}`);
+  } catch (err) {
+    console.error(`Video ${video._id} audio check failed:`, err.message);
+  }
+  video.audioChecked = true;
+  await Video.updateOne({ _id: video._id }, { $set: { audioChecked: true } });
+}
+
 /** Mark an upload finished once every chunk has arrived. */
 async function finishVideoUpload(video) {
   const received = await VideoChunk.countDocuments({ video: video._id });
@@ -78,6 +126,7 @@ async function finishVideoUpload(video) {
   }
   video.complete = true;
   await video.save();
+  await repairVideoAudio(video);
   return URL_PREFIX + video._id;
 }
 
@@ -87,6 +136,8 @@ async function streamVideo(req, res) {
     if (!isId(req.params.id)) return res.status(404).end();
     const video = await Video.findById(req.params.id);
     if (!video || !video.complete) return res.status(404).end();
+    // Videos uploaded before the audio repair existed get fixed on first play
+    if (!video.audioChecked) await repairVideoAudio(video);
 
     const size = video.size;
     let start = 0;
@@ -113,14 +164,7 @@ async function streamVideo(req, res) {
     // Browsers simply ask for the next range.
     end = Math.min(end, start + MAX_RESPONSE_BYTES - 1);
 
-    const first = Math.floor(start / video.chunkSize);
-    const last = Math.floor(end / video.chunkSize);
-    const chunks = await VideoChunk.find({ video: video._id, n: { $gte: first, $lte: last } }).sort({ n: 1 });
-    if (chunks.length !== last - first + 1) return res.status(500).json({ success: false, message: 'Video data is incomplete.' });
-
-    const joined = Buffer.concat(chunks.map((c) => c.data));
-    const offset = start - first * video.chunkSize;
-    const body = joined.subarray(offset, offset + (end - start + 1));
+    const body = await readVideoBytes(video, start, end - start + 1);
     const partial = Boolean(range) || end < size - 1;
 
     res.status(partial ? 206 : 200);
